@@ -4,17 +4,17 @@
 // Email :  string(CharField)
 // DOB : Date
 // FullName :  string(CharField)
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    //     userId: {
-    //       type: String,
-    //       required: [true, "User ID is required"],
-    //       unique: true,
-    //       trim: true,
-    //       minlength: [4, "User ID must be at least 4 characters long"],
-    //     },
+    // userId: {
+    //   type: String,
+    //   required: [true, "User ID is required"],
+    //   unique: true,
+    //   trim: true,
+    //   minlength: [4, "User ID must be at least 4 characters long"],
+    // },
     firstname: {
       type: String,
       required: [true, "First name is required"],
@@ -51,8 +51,10 @@ const userSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true, // adds createdAt and updatedAt fields
+    timestamps: true,
   }
 );
 
-module.exports = mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema);
+
+export default User;
