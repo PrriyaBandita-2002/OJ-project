@@ -1,7 +1,9 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../model/user.js";
+import cookieParser from "cookie-parser";
 
+// Register
 const registerUser = async (req, res) => {
   try {
     const { firstname, lastname, dob, email, password } = req.body;
@@ -37,6 +39,14 @@ const registerUser = async (req, res) => {
       { expiresIn: "24h" }
     );
 
+    // ✅ Set cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    });
+
     res.status(201).json({
       success: true,
       message: "User registered successfully!",
@@ -48,7 +58,6 @@ const registerUser = async (req, res) => {
         email: user.email,
         createdAt: user.createdAt,
       },
-      token,
     });
   } catch (error) {
     console.error("Registration error:", error);
@@ -59,6 +68,7 @@ const registerUser = async (req, res) => {
   }
 };
 
+// Login
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -92,6 +102,13 @@ const loginUser = async (req, res) => {
       { expiresIn: "24h" }
     );
 
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    });
+
     res.status(200).json({
       success: true,
       message: "Login successful!",
@@ -102,7 +119,6 @@ const loginUser = async (req, res) => {
         dob: user.dob,
         email: user.email,
       },
-      token,
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -111,6 +127,14 @@ const loginUser = async (req, res) => {
       message: "Internal server error during login",
     });
   }
+};
+const logoutUser = (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+  });
+  res.status(200).json({ success: true, message: "Logged out successfully" });
 };
 
 export { registerUser, loginUser };

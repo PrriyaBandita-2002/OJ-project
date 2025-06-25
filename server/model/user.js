@@ -8,13 +8,13 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    // userId: {
-    //   type: String,
-    //   required: [true, "User ID is required"],
-    //   unique: true,
-    //   trim: true,
-    //   minlength: [4, "User ID must be at least 4 characters long"],
-    // },
+    username: {
+      type: String,
+      required: [true, "User ID is required"],
+      unique: true,
+      trim: true,
+      minlength: [4, "User ID must be at least 4 characters long"],
+    },
     firstname: {
       type: String,
       required: [true, "First name is required"],
