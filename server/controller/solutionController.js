@@ -1,4 +1,4 @@
-import Solution from "../models/Solution.js";
+import Solution from "../models/solution.model.js";
 
 // Create a new solution
 export const createsolution = async (req, res) => {

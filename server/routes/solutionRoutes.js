@@ -2,7 +2,7 @@ import express from "express";
 import {
   createsolution,
   getAllSolutions,
-} from "../controllers/solutionController.js";
+} from "../controller/solutionController.js";
 
 const router = express.Router();
 

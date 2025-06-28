@@ -4,11 +4,11 @@ import {
   getTestCasesByProblem,
   updateTestCase,
   deleteTestCase,
-} from "../controller/testcaseController";
+} from "../controller/testcaseController.js";
 const router = express.Router();
 router.post("/", createTestCase);
 router.get("/", getTestCasesByProblem);
-router.update("/:id", updateTestCase);
+router.put("/:id", updateTestCase);
 router.delete("/:id", deleteTestCase);
 
 export default router;

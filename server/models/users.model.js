@@ -8,13 +8,6 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    username: {
-      type: String,
-      required: [true, "User ID is required"],
-      unique: true,
-      trim: true,
-      minlength: [4, "User ID must be at least 4 characters long"],
-    },
     firstname: {
       type: String,
       required: [true, "First name is required"],
@@ -28,6 +21,11 @@ const userSchema = new mongoose.Schema(
       trim: true,
       minlength: [2, "Last name must be at least 2 characters long"],
       maxlength: [50, "Last name cannot exceed 50 characters"],
+    },
+    username: {
+      type: String,
+      required: true,
+      unique: true,
     },
     dob: {
       type: Date,
@@ -47,7 +45,11 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, "Password is required"],
-      minlength: [6, "Password must be at least 6 characters long"],
+    },
+    role: {
+      type: String,
+      enum: ["user", "admin", "problem_setter"],
+      default: "user",
     },
   },
   {

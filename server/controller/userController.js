@@ -1,14 +1,15 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import User from "../model/user.js";
+import User from "../models/users.model.js";
 import cookieParser from "cookie-parser";
 
 // Register
 const registerUser = async (req, res) => {
   try {
-    const { firstname, lastname, dob, email, password } = req.body;
+    const { firstname, lastname, username, dob, email, password } = req.body;
+    console.log("Received user data:", req.body);
 
-    if (!(firstname && lastname && dob && email && password)) {
+    if (!(firstname && lastname && username && dob && email && password)) {
       return res.status(400).json({
         success: false,
         message: "Please provide all required fields",
@@ -28,18 +29,18 @@ const registerUser = async (req, res) => {
     const user = await User.create({
       firstname: firstname.trim(),
       lastname: lastname.trim(),
+      username: username.trim(),
       dob: new Date(dob),
       email: email.toLowerCase().trim(),
       password: hashedPassword,
     });
 
     const token = jwt.sign(
-      { id: user._id, email: user.email },
+      { id: user._id, email: user.email, role: user.role },
       process.env.SECRET_KEY,
       { expiresIn: "24h" }
     );
 
-    // ✅ Set cookie
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -50,21 +51,26 @@ const registerUser = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "User registered successfully!",
+      token,
       user: {
         _id: user._id,
         firstname: user.firstname,
         lastname: user.lastname,
+        username: user.username,
         dob: user.dob,
         email: user.email,
-        createdAt: user.createdAt,
+        role: user.role,
       },
     });
   } catch (error) {
-    console.error("Registration error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error during registration",
-    });
+    if (error.code === 11000) {
+      return res.status(409).json({
+        message: "Duplicate field: " + Object.keys(error.keyPattern)[0],
+      });
+    }
+    res
+      .status(500)
+      .json({ message: "Registration error", error: error.message });
   }
 };
 
@@ -97,8 +103,8 @@ const loginUser = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user._id, email: user.email },
-      process.env.SECRET_KEY,
+      { id: user._id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
       { expiresIn: "24h" }
     );
 
@@ -112,12 +118,14 @@ const loginUser = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Login successful!",
+      token,
       user: {
         _id: user._id,
         firstname: user.firstname,
         lastname: user.lastname,
         dob: user.dob,
         email: user.email,
+        role: user.role || "user",
       },
     });
   } catch (error) {
@@ -136,5 +144,24 @@ const logoutUser = (req, res) => {
   });
   res.status(200).json({ success: true, message: "Logged out successfully" });
 };
+// controller/userController.js
+export const updateUserRole = async (req, res) => {
+  const { role } = req.body;
+  const validRoles = ["user", "admin", "problem_setter"];
 
-export { registerUser, loginUser };
+  if (!validRoles.includes(role)) {
+    return res.status(400).json({ message: "Invalid role" });
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.params.id,
+    { role },
+    { new: true }
+  );
+
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  res.status(200).json({ message: "Role updated", user });
+};
+
+export { registerUser, loginUser, logoutUser };

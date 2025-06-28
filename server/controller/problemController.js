@@ -1,7 +1,10 @@
-import Problem from "../model/problems";
+import Problem from "../models/problem.model.js";
+
 export const createProblem = async (req, res) => {
   try {
-    const problem = new Problem(req.body);
+    const { name, statement, code, difficulty } = req.body;
+
+    const problem = new Problem({ name, statement, code, difficulty });
     await problem.save();
     res.status(201).json({ success: true, data: problem });
   } catch (error) {

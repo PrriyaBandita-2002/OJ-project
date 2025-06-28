@@ -1,4 +1,4 @@
-import Test from "../models/test.js";
+import TestCase from "../models/testcase.model.js";
 import { getTestCases } from "../utils/testCaseUtils.js";
 export const createTestCase = async (req, res) => {
   try {
@@ -6,15 +6,13 @@ export const createTestCase = async (req, res) => {
 
     // Validate input and output
     if (!input || !output || !problem) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Input, output, and problem are required.",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Input, output, and problem are required.",
+      });
     }
 
-    const newTestCase = new Test({
+    const newTestCase = new TestCase({
       input,
       output,
       problem,
@@ -43,12 +41,10 @@ export const getTestCasesByProblem = async (req, res) => {
     const testCases = await getTestCases(problemId);
 
     if (!testCases || testCases.length === 0) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: "No test cases found for this problem.",
-        });
+      return res.status(404).json({
+        success: false,
+        message: "No test cases found for this problem.",
+      });
     }
 
     res.status(200).json({ success: true, data: testCases });
@@ -70,7 +66,7 @@ export const updateTestCase = async (req, res) => {
         .json({ success: false, message: "Input and output are required." });
     }
 
-    const updatedTestCase = await Test.findByIdAndUpdate(
+    const updatedTestCase = await TestCase.findByIdAndUpdate(
       id,
       { input, output },
       { new: true, runValidators: true }
@@ -93,7 +89,7 @@ export const deleteTestCase = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const deletedTestCase = await Test.findByIdAndDelete(id);
+    const deletedTestCase = await TestCase.findByIdAndDelete(id);
 
     if (!deletedTestCase) {
       return res
