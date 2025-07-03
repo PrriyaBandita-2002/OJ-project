@@ -1,15 +1,22 @@
 const express = require("express");
-const app = express();
+const dotenv = require("dotenv");
 const { generateFile } = require("./generateFile");
 const { generateInputFile } = require("./generateInputFile");
 const { executeCpp } = require("./executeCpp");
 const { executePython } = require("./executePython");
 const { executeC } = require("./executeC");
 const { executeJava } = require("./executeJava");
+const { aiCodeReview } = require("./aireview");
 const cors = require("cors");
+const app = express();
+dotenv.config();
 
 // Middleware setup
-app.use(cors()); // Enable Cross-Origin Resource Sharing
+app.use(cors());
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+}); // Enable Cross-Origin Resource Sharing
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded data
 app.use(express.json()); // Parse JSON data
 
@@ -17,7 +24,21 @@ app.use(express.json()); // Parse JSON data
 app.get("/", (req, res) => {
   res.json({ online: "compiler" });
 });
+app.post("/ai-review", async (req, res) => {
+  const { code } = req.body;
+  if (!code) {
+    return res.status(400).json({ success: false, error: "Empty code!" });
+  }
 
+  try {
+    const review = await aiCodeReview(code);
+    res.json({ review: review });
+  } catch (error) {
+    res.status(500).json({
+      error: "Error in AI review, error: " + error.message,
+    });
+  }
+});
 // Main endpoint to compile and run C++ code
 app.post("/run", async (req, res) => {
   // Extract language, code, and input from request body with defaults

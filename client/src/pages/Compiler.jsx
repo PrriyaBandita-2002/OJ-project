@@ -1,14 +1,19 @@
 import { useState, useEffect } from 'react';
 import Editor from 'react-simple-code-editor';
 import { highlight } from 'prismjs/components/prism-core';
-import Prism from 'prismjs/components/prism-core';
+import Prism from 'prismjs';
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-c';
+import 'prismjs/components/prism-cpp';
 import 'prismjs/components/prism-java';
 import 'prismjs/components/prism-python';
 import 'prismjs/themes/prism.css';
 import axios from 'axios';
+import ReactMarkdown from 'react-markdown';
+
 const BASE_URL = import.meta.env.VITE_COMPILER_URL;
+const REVIEW_URL = import.meta.env.VITE_GOOGLE_GEMINI_API_URL;
+
 const defaultCodes = {
   C: `#include <stdio.h>
 int main() {
@@ -36,60 +41,58 @@ public class Main {
 }`,
   Python: `a = int(input())
 b = int(input())
-print(a + b)`,
+print(a + b)`
 };
 
-function App() {
-  const [code, setCode] = useState('');
+export default function CompilerApp() {
+  const [code, setCode] = useState(defaultCodes["Cpp"]);
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [lang, setLang] = useState('Cpp');
-  const languages = ['C', 'Cpp', 'Java', 'Python'];
+  const [aiReview, setAiReview] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setCode(defaultCodes[lang]);
   }, [lang]);
 
-  const handleSubmit = async () => {
-    if (isLoading) return;
+  const handleRun = async () => {
     setIsLoading(true);
     setOutput('');
-
-    const payload = {
-      language: lang.toLowerCase() === 'cpp' ? 'cpp' : lang.toLowerCase(),
-      code,
-      input,
-    };
-
     try {
-      const { data } = await axios.post(`${BASE_URL}/run`, payload);
+      const { data } = await axios.post(`${BASE_URL}/run`, {
+        language: lang.toLowerCase() === 'cpp' ? 'cpp' : lang.toLowerCase(),
+        code,
+        input,
+      });
       setOutput(data.output);
     } catch (error) {
-      if (error.response) {
-        setOutput(`Error: ${error.response.data.error || 'Server error occurred'}`);
-      } else if (error.request) {
-        setOutput('Error: Could not connect to server.');
-      } else {
-        setOutput(`Error: ${error.message}`);
-      }
+      setOutput('Error: ' + (error.response?.data?.error || error.message));
     } finally {
       setIsLoading(false);
     }
   };
 
-  return (
-    <div className="min-h-screen px-6 py-10 font-sans text-gray-800 bg-gray-50 lg:px-16">
-      <h1 className="mb-10 text-4xl font-bold text-center text-indigo-600">
-         Code Compiler 
-      </h1>
+  const handleAiReview = async () => {
+    try {
+      const { data } = await axios.post(REVIEW_URL, { code });
+      setAiReview(data.review);
+    } catch (error) {
+      setAiReview('Error in AI review: ' + error.message);
+    }
+  };
 
-      <div className="flex flex-col gap-10 lg:flex-row">
+  const languages = ['C', 'Cpp', 'Java', 'Python'];
+
+  return (
+    <div className="min-h-screen p-6 bg-gray-50">
+      <h1 className="mb-6 text-4xl font-extrabold text-center text-gray-800">AlgoU Online Code Compiler</h1>
+
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         {/* Code Editor Section */}
-        <div className="space-y-4 lg:w-1/2">
-          {/* Language Buttons */}
-          <div className="flex flex-wrap gap-2">
-            {languages.map((language) => (
+        <div className="flex flex-col h-full p-4 bg-white rounded-lg shadow-lg">
+          <div className="flex flex-wrap gap-2 mb-4">
+            {languages.map(language => (
               <button
                 key={language}
                 onClick={() => setLang(language)}
@@ -104,92 +107,79 @@ function App() {
             ))}
           </div>
 
-          {/* Code Editor */}
-          <div className="bg-white border border-gray-200 rounded-lg shadow-sm h-[400px] overflow-y-auto">
+          <div className="flex-grow overflow-y-auto bg-gray-100 rounded-lg" style={{ height: '500px' }}>
             <Editor
               value={code}
               onValueChange={setCode}
               highlight={(code) => {
                 const lower = lang.toLowerCase();
                 const prismLang =
-                  lower === 'python'
-                    ? Prism.languages.python
-                    : lower === 'java'
-                    ? Prism.languages.java
-                    : lower === 'c'
-                    ? Prism.languages.c
-                    : Prism.languages.clike;
+                  lower === 'python' ? Prism.languages.python :
+                  lower === 'java' ? Prism.languages.java :
+                  lower === 'c' ? Prism.languages.c :
+                  Prism.languages.clike;
                 return highlight(code, prismLang, lang.toLowerCase());
               }}
-              padding={12}
+              padding={15}
               style={{
                 fontFamily: '"Fira Code", monospace',
                 fontSize: 14,
-                minHeight: '100%',
-                backgroundColor: '#f9fafb',
+                minHeight: '500px'
               }}
             />
           </div>
 
-          {/* Editor Buttons */}
-          <div className="flex justify-between gap-4">
+          <div className="flex gap-4 mt-4">
             <button
               onClick={() => setCode('')}
-              className="px-4 py-2 text-sm font-medium text-red-600 border border-red-400 rounded hover:bg-red-50"
-            >
-              Clear Code
-            </button>
+              className="flex-1 px-4 py-2 text-red-600 bg-red-100 border border-red-300 rounded hover:bg-red-200"
+            >Clear</button>
             <button
               onClick={() => setCode(defaultCodes[lang])}
-              className="px-4 py-2 text-sm font-medium text-green-600 border border-green-400 rounded hover:bg-green-50"
-            >
-              Reset Code
-            </button>
+              className="flex-1 px-4 py-2 text-green-600 bg-green-100 border border-green-300 rounded hover:bg-green-200"
+            >Reset</button>
           </div>
-
-          {/* Run Button */}
-          <button
-            onClick={handleSubmit}
-            disabled={isLoading}
-            className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md text-white font-semibold transition ${
-              isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-500 hover:bg-indigo-600'
-            }`}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.6 3.11a.375.375 0 0 1-.56-.327V8.887c0-.285.308-.465.56-.326l5.6 3.11z"
-              />
-            </svg>
-            {isLoading ? 'Running...' : 'Run Code'}
-          </button>
         </div>
 
-        {/* Input and Output Section */}
-        <div className="space-y-6 lg:w-1/2">
-          <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">Program Input</label>
+        {/* Input / Output / Review Section */}
+        <div className="flex flex-col gap-4">
+          <div className="p-4 bg-white rounded-lg shadow-lg">
+            <h2 className="mb-2 text-lg font-semibold text-gray-700">Input</h2>
             <textarea
+              rows="4"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              rows={5}
+              placeholder="Enter input values..."
               className="w-full p-3 text-sm border border-gray-300 rounded-md resize-none"
-              placeholder="Enter input (optional)"
             />
           </div>
 
-          <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">Output</label>
-            <div className="p-3 overflow-y-auto font-mono text-sm bg-gray-100 border border-gray-200 rounded-md h-28">
-              {output || 'Output will appear here...'}
+          <div className="p-4 overflow-y-auto bg-white rounded-lg shadow-lg" style={{ height: '150px' }}>
+            <h2 className="mb-2 text-lg font-semibold text-gray-700">Output</h2>
+            <div className="font-mono text-sm text-gray-800 whitespace-pre-wrap">{output || 'Output will appear here...'}</div>
+          </div>
+
+          <div className="p-4 bg-white rounded-lg shadow-lg">
+            <h2 className="mb-2 text-lg font-semibold text-gray-700">AI Review</h2>
+            <div className="overflow-y-auto prose-sm prose text-gray-800" style={{ height: '150px' }}>
+              {aiReview === '' ? <div>Waiting for review...</div> : <ReactMarkdown>{aiReview}</ReactMarkdown>}
             </div>
+          </div>
+
+          <div className="flex gap-4 mt-2">
+            <button
+              onClick={handleRun}
+              disabled={isLoading}
+              className="flex-1 px-4 py-2 font-medium text-white transition bg-blue-600 rounded-lg hover:bg-blue-700"
+            >{isLoading ? 'Running...' : 'Run Code'}</button>
+
+            <button
+              onClick={handleAiReview}
+              className="flex-1 px-4 py-2 font-medium text-white transition bg-green-600 rounded-lg hover:bg-green-700"
+            >AI Review</button>
           </div>
         </div>
       </div>
     </div>
   );
 }
-
-export default App;
