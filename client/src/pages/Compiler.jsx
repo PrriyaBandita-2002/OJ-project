@@ -86,7 +86,7 @@ export default function CompilerApp() {
 
   return (
     <div className="min-h-screen p-6 bg-gray-50">
-      <h1 className="mb-6 text-4xl font-extrabold text-center text-gray-800">AlgoU Online Code Compiler</h1>
+      <h1 className="mb-6 text-4xl font-extrabold text-center text-gray-800">Online Code Compiler</h1>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         {/* Code Editor Section */}
