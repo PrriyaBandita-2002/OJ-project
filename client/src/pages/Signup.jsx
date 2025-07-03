@@ -1,6 +1,10 @@
 import React, { useState } from "react";
-
+import axios from "axios";
+import { useNavigate, Link } from "react-router-dom";
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 const Signup = () => {
+  const navigate = useNavigate();
+
   const [values, setValues] = useState({
     firstname: "",
     lastname: "",
@@ -16,8 +20,28 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Registering with", values);
-    // TODO: Call backend API here
+    const { firstname, lastname, username, email, dob, password } = values;
+
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/api/auth/register`,
+        { firstname, lastname, username, email, dob, password },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error("Signup error:", error.response?.data?.message || error.message);
+      alert(error.response?.data?.message || "Signup failed.");
+    }
   };
 
   return (
@@ -26,100 +50,23 @@ const Signup = () => {
         <h2 className="mb-6 text-2xl font-bold text-center text-blue-600">Create an Account</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="firstname" className="block text-sm font-medium text-gray-700">
-              First Name
-            </label>
-            <input
-              type="text"
-              name="firstname"
-              id="firstname"
-              value={values.firstname}
-              onChange={handleChange}
-              className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter your first name"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="lastname" className="block text-sm font-medium text-gray-700">
-              Last Name
-            </label>
-            <input
-              type="text"
-              name="lastname"
-              id="lastname"
-              value={values.lastname}
-              onChange={handleChange}
-              className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter your last name"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-              Username
-            </label>
-            <input
-              type="text"
-              name="username"
-              id="username"
-              value={values.username}
-              onChange={handleChange}
-              className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Choose a username"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <input
-              type="email"
-              name="email"
-              id="email"
-              value={values.email}
-              onChange={handleChange}
-              className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter your email"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="dob" className="block text-sm font-medium text-gray-700">
-              Date of Birth
-            </label>
-            <input
-              type="date"
-              name="dob"
-              id="dob"
-              value={values.dob}
-              onChange={handleChange}
-              className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <input
-              type="password"
-              name="password"
-              id="password"
-              value={values.password}
-              onChange={handleChange}
-              className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter a password"
-              required
-            />
-          </div>
+          {["firstname", "lastname", "username", "email", "dob", "password"].map((field) => (
+            <div key={field}>
+              <label htmlFor={field} className="block text-sm font-medium text-gray-700 capitalize">
+                {field === "dob" ? "Date of Birth" : field.replace(/([A-Z])/g, " $1")}
+              </label>
+              <input
+                type={field === "password" ? "password" : field === "dob" ? "date" : "text"}
+                name={field}
+                id={field}
+                value={values[field]}
+                onChange={handleChange}
+                required
+                className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                placeholder={field === "dob" ? "" : `Enter your ${field}`}
+              />
+            </div>
+          ))}
 
           <button
             type="submit"
@@ -131,9 +78,9 @@ const Signup = () => {
 
         <p className="mt-4 text-sm text-center text-gray-500">
           Already have an account?{" "}
-          <a href="/login" className="text-blue-600 hover:underline">
+          <Link to="/login" className="text-blue-600 hover:underline">
             Log in
-          </a>
+          </Link>
         </p>
       </div>
     </div>

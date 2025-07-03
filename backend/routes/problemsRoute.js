@@ -8,12 +8,12 @@ import {
 } from "../controller/problemController.js";
 import { verifyToken } from "../Middleware/verifyToken.js";
 import { isAdmin } from "../Middleware/isAdmin.js";
-import { isProblem_setter } from "../Middleware/isProblem_setter.js";
+
 const router = express.Router();
-router.get("/", getAllProblems);
+router.post("/createProblem", verifyToken, isAdmin, createProblem);
+router.get("/problemlist", getAllProblems);
 router.get("/:id", getproblemById);
-router.post("/", verifyToken, isProblem_setter, createProblem);
-router.put("/:id", verifyToken, isProblem_setter, updateproblem);
-router.delete("/:id", verifyToken, isProblem_setter, deleteproblem);
+router.put("/:id", verifyToken, isAdmin, updateproblem);
+router.delete("/:id", verifyToken, isAdmin, deleteproblem);
 
 export default router;

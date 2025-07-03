@@ -21,6 +21,6 @@ router.get("/admin-only", verifyToken, isAdmin, (req, res) => {
   res.status(200).json({ message: "Welcome, admin!" });
 });
 // routes/userRoutes.js
-router.patch("/:id/role", verifyToken, isAdmin, updateUserRole);
+// router.patch("/:id/role", verifyToken, isAdmin, updateUserRole);
 
 export default router;

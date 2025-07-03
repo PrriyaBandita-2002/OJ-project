@@ -1,0 +1,1 @@
+#include<stdio.h>\nint main() {\n  printf(\"Hello from C\\n\");\n  return 0;\n}

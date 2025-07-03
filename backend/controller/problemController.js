@@ -2,9 +2,32 @@ import Problem from "../models/problem.model.js";
 
 export const createProblem = async (req, res) => {
   try {
-    const { name, statement, code, difficulty } = req.body;
-
-    const problem = new Problem({ name, statement, code, difficulty });
+    const {
+      title,
+      description,
+      difficulty,
+      input_format,
+      output_format,
+      constraints,
+      topics,
+      acceptance,
+      example_cases,
+      test_cases,
+      starter_code,
+    } = req.body;
+    const problem = new Problem({
+      title,
+      description,
+      difficulty,
+      input_format,
+      output_format,
+      constraints,
+      topics,
+      acceptance,
+      example_cases,
+      test_cases,
+      starter_code,
+    });
     await problem.save();
     res.status(201).json({ success: true, data: problem });
   } catch (error) {
