@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import {jwtDecode }from "jwt-decode";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
@@ -11,31 +12,44 @@ const Login = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const { email, password } = values;
+  e.preventDefault();
+  const { email, password } = values;
 
-    try {
-      const response = await axios.post(
-        `${BASE_URL}/api/auth/login`,
-        { email, password },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
+  try {
+    const response = await axios.post(
+      `${BASE_URL}/api/auth/login`,
+      { email, password },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      }
+    );
 
-      if (response.data.token) {
-        localStorage.setItem("token", response.data.token);
-        console.log(response.data.token);
+    if (response.data.token) {
+      const token = response.data.token;
+      localStorage.setItem("token", token);
+localStorage.setItem("userId", response.data.user._id);
+      // 👇 Decode token to get role
+      const decoded = jwtDecode(token);
+      const role = decoded.role || decoded.user?.role;
+
+      // 👇 Save role in localStorage too (optional but useful)
+      localStorage.setItem("role", role);
+
+      // 👇 Navigate based on role
+      if (role === "admin") {
+        navigate("/admindashboard");
+      } else {
         navigate("/dashboard");
       }
-    } catch (error) {
-      console.error("Login error:", error.response?.data?.message || error.message);
-      alert(error.response?.data?.message || "Login failed.");
     }
-  };
+  } catch (error) {
+    console.error("Login error:", error.response?.data?.message || error.message);
+    alert(error.response?.data?.message || "Login failed.");
+  }
+};
 
   return (
     <div className="flex items-center justify-center min-h-screen px-4 bg-gray-100">

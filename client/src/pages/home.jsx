@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import Editor from "react-simple-code-editor";
 import { highlight } from "prismjs";
 import Prism from "prismjs/components/prism-core";

@@ -1,78 +1,167 @@
-// import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
-// export default function Profile() {
-//   const [user, setUser] = useState({
-//     name: "John Doe",
-//     email: "john@example.com",
-//     role: "user", // or "admin", "problem_setter"
-//     problemsSolved: 79,
-//     submissions: 210,
-//     rank: 1234,
-//   });
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
-//   const getRoleBadge = (role) => {
-//     const base = "text-xs px-2 py-1 rounded-full font-semibold";
-//     switch (role) {
-//       case "admin":
-//         return `${base} bg-red-100 text-red-600`;
-//       case "problem_setter":
-//         return `${base} bg-yellow-100 text-yellow-600`;
-//       default:
-//         return `${base} bg-green-100 text-green-600`;
-//     }
-//   };
+export default function Profile() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+  });
 
-//   const handleLogout = () => {
-//     // Clear auth tokens or call backend logout
-//     console.log("Logging out...");
-//   };
+  // Fetch user profile on load
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await axios.get(`${BASE_URL}/api/auth/profile`, {
+          withCredentials: true,
+        });
+        setUser(res.data.user);
+        setFormData({
+          username: res.data.user.username,
+          email: res.data.user.email,
+        });
+      } catch (err) {
+        console.error('Failed to fetch profile:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-//   return (
-//     <div className="min-h-screen px-4 py-10 bg-gray-50">
-//       <div className="max-w-3xl p-6 mx-auto bg-white rounded-lg shadow">
-//         <div className="flex items-center gap-6">
-//           <img
-//             src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.name}`}
-//             alt="avatar"
-//             className="w-20 h-20 rounded-full"
-//           />
-//           <div>
-//             <h2 className="text-2xl font-bold text-gray-800">{user.name}</h2>
-//             <p className="text-sm text-gray-500">{user.email}</p>
-//             <span className={getRoleBadge(user.role)}>{user.role}</span>
-//           </div>
-//         </div>
+    fetchProfile();
+  }, []);
 
-//         <div className="grid grid-cols-3 gap-4 mt-6 text-center">
-//           <div>
-//             <p className="text-lg font-semibold text-indigo-700">{user.problemsSolved}</p>
-//             <p className="text-sm text-gray-600">Problems Solved</p>
-//           </div>
-//           <div>
-//             <p className="text-lg font-semibold text-indigo-700">{user.submissions}</p>
-//             <p className="text-sm text-gray-600">Submissions</p>
-//           </div>
-//           <div>
-//             <p className="text-lg font-semibold text-indigo-700">#{user.rank}</p>
-//             <p className="text-sm text-gray-600">Global Rank</p>
-//           </div>
-//         </div>
+  // Handle profile update
+  const handleUpdate = async () => {
+    try {
+      const res = await axios.put(`${BASE_URL}/api/auth/profile`, formData, {
+        withCredentials: true,
+      });
+      setUser(res.data.updatedUser);
+      setEditing(false);
+      alert("Profile updated successfully!");
+    } catch (err) {
+      console.error("Failed to update profile:", err);
+      alert("Error updating profile.");
+    }
+  };
 
-//         <div className="flex gap-3 mt-6">
-//           <button
-//             onClick={() => console.log("Edit profile")}
-//             className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded hover:bg-indigo-700"
-//           >
-//             Edit Profile
-//           </button>
-//           <button
-//             onClick={handleLogout}
-//             className="px-4 py-2 text-sm font-medium text-gray-800 bg-gray-200 rounded hover:bg-gray-300"
-//           >
-//             Logout
-//           </button>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
+  // Handle profile delete
+  const handleDelete = async () => {
+    const confirmDelete = window.confirm("Are you sure you want to delete your account?");
+    if (!confirmDelete) return;
+
+    try {
+      await axios.delete(`${BASE_URL}/api/auth/profile`, {
+        withCredentials: true,
+      });
+      localStorage.clear();
+      alert("Account deleted. Redirecting to login...");
+      window.location.href = "/login";
+    } catch (err) {
+      console.error("Failed to delete profile:", err);
+      alert("Error deleting account.");
+    }
+  };
+
+  if (loading) {
+    return <div className="p-8 text-center text-gray-500">Loading profile...</div>;
+  }
+
+  if (!user) {
+    return <div className="p-8 text-center text-red-500">Failed to load user details.</div>;
+  }
+
+  return (
+    <div className="flex items-center justify-center min-h-screen p-6 bg-gray-50">
+      <div className="w-full max-w-md p-6 bg-white shadow-md rounded-xl">
+        <h1 className="mb-4 text-2xl font-bold text-center text-indigo-700">User Profile</h1>
+
+        {editing ? (
+          <>
+            <div className="space-y-4">
+              <InputField
+                label="Username"
+                value={formData.username}
+                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              />
+              <InputField
+                label="Email"
+                value={formData.email}
+                type="email"
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
+            </div>
+
+            <div className="flex justify-between mt-6 space-x-4">
+              <button
+                onClick={handleUpdate}
+                className="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700"
+              >
+                Save Changes
+              </button>
+              <button
+                onClick={() => setEditing(false)}
+                className="px-4 py-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="space-y-3">
+              <ProfileItem label="Name" value={user.username || user.name || '—'} />
+              <ProfileItem label="Email" value={user.email} />
+              <ProfileItem label="Role" value={user.role || 'user'} />
+              <ProfileItem label="Joined" value={new Date(user.createdAt).toLocaleDateString()} />
+            </div>
+
+            <div className="flex justify-between mt-6 space-x-4">
+              <button
+                onClick={() => setEditing(true)}
+                className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700"
+              >
+                Edit Profile
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 text-white bg-red-600 rounded hover:bg-red-700"
+              >
+                Delete Profile
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Component to show profile info
+function ProfileItem({ label, value }) {
+  return (
+    <div className="flex justify-between pb-2 text-sm text-gray-700 border-b">
+      <span className="font-medium">{label}:</span>
+      <span>{value}</span>
+    </div>
+  );
+}
+
+// Component for input field
+function InputField({ label, value, onChange, type = "text" }) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-indigo-300"
+      />
+    </div>
+  );
+}

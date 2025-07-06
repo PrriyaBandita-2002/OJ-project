@@ -59,6 +59,45 @@ export const getproblemById = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+export const getContestProblemById = async (req, res) => {
+  try {
+    const problem = await Problem.findById(req.params.id).populate("contest");
+
+    if (!problem) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Problem not found" });
+    }
+
+    if (!problem.contest) {
+      return res
+        .status(400)
+        .json({ success: false, message: "This is not a contest problem" });
+    }
+
+    const now = new Date();
+    const start = new Date(problem.contest.startTime);
+    const end = new Date(problem.contest.endTime);
+
+    if (now < start) {
+      return res.status(403).json({
+        success: false,
+        message: "Contest has not started yet",
+      });
+    }
+
+    if (now > end) {
+      return res.status(403).json({
+        success: false,
+        message: "Contest has ended",
+      });
+    }
+
+    res.status(200).json({ success: true, data: problem });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
 
 //update a problem
 export const updateproblem = async (req, res) => {

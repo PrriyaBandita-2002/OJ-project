@@ -43,9 +43,9 @@ const registerUser = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      secure: false, // ✅ for local dev (no HTTPS)
+      sameSite: "Lax", // ✅ allows cookies across localhost ports
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
     });
 
     res.status(201).json({
@@ -165,3 +165,28 @@ export const updateUserRole = async (req, res) => {
 };
 
 export { registerUser, loginUser, logoutUser };
+export const updateProfile = async (req, res) => {
+  try {
+    const { username, email } = req.body;
+    const userId = req.user.id;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { username, email },
+      { new: true }
+    );
+
+    res.status(200).json({ updatedUser });
+  } catch (err) {
+    res.status(500).json({ error: "Error updating profile" });
+  }
+};
+export const deleteProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    await User.findByIdAndDelete(userId);
+    res.clearCookie("token").status(200).json({ message: "User deleted" });
+  } catch (err) {
+    res.status(500).json({ error: "Error deleting user" });
+  }
+};

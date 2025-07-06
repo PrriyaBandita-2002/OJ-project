@@ -15,6 +15,7 @@ export default function ProblemsList() {
   const [filter, setFilter] = useState('All');
   const [topic, setTopic] = useState('All');
   const navigate = useNavigate();
+const userRole = localStorage.getItem('role'); // or from context/auth state
 
   useEffect(() => {
     const fetchProblems = async () => {
@@ -33,11 +34,28 @@ setProblems(res.data.data);
     (filter === 'All' || p.difficulty === filter) &&
     (topic === 'All' || (p.topics && p.topics.includes(topic)))
   );
+ const handleDelete = async (id) => {
+  if (!window.confirm("Are you sure you want to delete this problem?")) return;
+  try {
+    await axios.delete(`${BASE_URL}/api/problems/deleteProblem/${id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+    setProblems((prev) => prev.filter((p) => p._id !== id));
+    alert("Problem deleted successfully!");
+  } catch (err) {
+    console.error("Delete failed:", err);
+    alert("Failed to delete problem.");
+  }
+};
+
+
 
   return (
     <div className="min-h-screen px-4 py-8 bg-gray-50">
       <div className="max-w-6xl mx-auto">
-        <h1 className="mb-6 text-3xl font-bold text-indigo-700">📚 Practice Problems</h1>
+        <h1 className="mb-6 text-3xl font-bold text-indigo-700"> Practice Problems</h1>
 
         {/* Difficulty Filter */}
         <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -112,7 +130,31 @@ setProblems(res.data.data);
                     ))}
                   </div>
                 )}
-              </div>
+                {/* ADMIN ONLY ACTIONS */}
+  {userRole === 'admin' && (
+    <div className="flex gap-2 mt-3">
+    <button
+  onClick={(e) => {
+    e.stopPropagation();
+    navigate(`/edit-problem/${p._id}`);
+  }}
+  className="px-3 py-1 text-sm text-white bg-yellow-500 rounded hover:bg-yellow-600"
+>
+  Edit
+</button>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          handleDelete(p._id);
+        }}
+        className="px-3 py-1 text-sm text-white bg-red-500 rounded hover:bg-red-600"
+      >
+        Delete
+      </button>
+    </div>
+  )}
+</div>
+              
             ))}
           </div>
         ) : (

@@ -76,6 +76,7 @@ export default function CompilerApp() {
   const handleAiReview = async () => {
     try {
       const { data } = await axios.post(REVIEW_URL, { code });
+      
       setAiReview(data.review);
     } catch (error) {
       setAiReview('Error in AI review: ' + error.message);

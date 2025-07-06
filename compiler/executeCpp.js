@@ -11,12 +11,12 @@ if (!fs.existsSync(outputPath)) {
 // Compiles and executes C++ code with given input
 const executeCpp = (filepath, inputPath) => {
   const jobId = path.basename(filepath).split(".")[0];
-  const outPath = path.join(outputPath, `${jobId}.out`);
+  const outPath = path.join(outputPath, `${jobId}.exe`);
 
   return new Promise((resolve, reject) => {
     // Compile C++ file with g++ and then execute it with input
     exec(
-      `g++ ${filepath} -o ${outPath} && cd ${outputPath} && ./${jobId}.out < ${inputPath}`,
+      `g++ ${filepath} -o ${outPath} && cd ${outputPath} && ./${jobId}.exe < ${inputPath}`,
       (error, stdout, stderr) => {
         if (error) {
           reject({ error, stderr });

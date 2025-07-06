@@ -2,8 +2,35 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
+const starterTemplates = {
+  "C++": `#include <iostream>
+using namespace std;
+
+int main() {
+    // your code goes here
+    return 0;
+}`,
+  C: `#include <stdio.h>
+
+int main() {
+    // your code goes here
+    return 0;
+}`,
+  Java: `public class Main {
+  public static void main(String[] args) {
+    // your code goes here
+  }
+}`,
+  Python: `# your code goes here`,
+};
+
 const AddProblem = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+
+  const [language, setLanguage] = useState("C++");
+  const [starterCodeMap, setStarterCodeMap] = useState({ ...starterTemplates });
+
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -14,11 +41,22 @@ const AddProblem = () => {
     topics: [""],
     example_cases: [{ input: "", output: "" }],
     test_cases: [{ input: "", output: "" }],
-    starter_code: ""
   });
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleLanguageChange = (e) => {
+    const selectedLang = e.target.value;
+    setLanguage(selectedLang);
+  };
+
+  const handleStarterCodeChange = (e) => {
+    setStarterCodeMap((prev) => ({
+      ...prev,
+      [language]: e.target.value,
+    }));
   };
 
   const handleArrayChange = (field, index, subfield, value) => {
@@ -26,15 +64,16 @@ const AddProblem = () => {
     updatedArray[index][subfield] = value;
     setForm({ ...form, [field]: updatedArray });
   };
-const handleTopicsChange = (e, idx) => {
-  const updated = [...form.topics];
-  updated[idx] = e.target.value;
-  setForm({ ...form, topics: updated });
-};
 
-const addTopic = () => {
-  setForm({ ...form, topics: [...form.topics, ""] });
-};
+  const handleTopicsChange = (e, idx) => {
+    const updated = [...form.topics];
+    updated[idx] = e.target.value;
+    setForm({ ...form, topics: updated });
+  };
+
+  const addTopic = () => {
+    setForm({ ...form, topics: [...form.topics, ""] });
+  };
 
   const handleConstraintChange = (index, value) => {
     const updatedConstraints = [...form.constraints];
@@ -57,21 +96,24 @@ const addTopic = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(    `${BASE_URL}/api/problems/createProblem`, form, {
+      await axios.post(`${BASE_URL}/api/problems/createProblem`, {
+        ...form,
+        starter_code: starterCodeMap, // ✅ sending language-wise code
+      }, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
       alert("Problem added successfully!");
-      navigate("/ProblemsList"); 
+      navigate("/ProblemsList");
     } catch (err) {
-  console.error(err); // keep this
-  if (err.response && err.response.data) {
-    alert("Error: " + err.response.data.error); // <-- show backend message
-  } else {
-    alert("Failed to add problem.");
-  }
-}
+      console.error(err);
+      if (err.response && err.response.data) {
+        alert("Error: " + err.response.data.error);
+      } else {
+        alert("Failed to add problem.");
+      }
+    }
   };
 
   return (
@@ -81,21 +123,21 @@ const addTopic = () => {
 
         <input name="title" value={form.title} onChange={handleChange} placeholder="Title" className="w-full p-2 border rounded" />
         <textarea name="description" value={form.description} onChange={handleChange} placeholder="Description" className="w-full h-24 p-2 border rounded" />
-<div>
-  <label className="font-semibold">Topics:</label>
-  {form.topics.map((topic, idx) => (
-    <input
-      key={idx}
-      value={topic}
-      onChange={(e) => handleTopicsChange(e, idx)}
-      className="w-full p-2 my-1 border rounded"
-      placeholder={`Topic ${idx + 1}`}
-    />
-  ))}
-  <button type="button" onClick={addTopic} className="mt-2 text-sm text-blue-500">
-    + Add Topic
-  </button>
-</div>
+
+        <div>
+          <label className="font-semibold">Topics:</label>
+          {form.topics.map((topic, idx) => (
+            <input
+              key={idx}
+              value={topic}
+              onChange={(e) => handleTopicsChange(e, idx)}
+              className="w-full p-2 my-1 border rounded"
+              placeholder={`Topic ${idx + 1}`}
+            />
+          ))}
+          <button type="button" onClick={addTopic} className="mt-2 text-sm text-blue-500">+ Add Topic</button>
+        </div>
+
         <select name="difficulty" value={form.difficulty} onChange={handleChange} className="w-full p-2 border rounded">
           <option>Easy</option>
           <option>Medium</option>
@@ -161,9 +203,22 @@ const addTopic = () => {
           <button type="button" onClick={addTestCase} className="text-sm text-blue-500">+ Add Test Case</button>
         </div>
 
-        <textarea name="starter_code" value={form.starter_code} onChange={handleChange} placeholder="Starter Code" className="w-full h-24 p-2 border rounded" />
+        <div>
+          <label className="font-semibold">Starter Code (Language):</label>
+          <select value={language} onChange={handleLanguageChange} className="w-full p-2 mb-2 border rounded">
+            {Object.keys(starterTemplates).map((lang) => (
+              <option key={lang} value={lang}>{lang}</option>
+            ))}
+          </select>
+          <textarea
+            value={starterCodeMap[language]}
+            onChange={handleStarterCodeChange}
+            placeholder={`Starter Code for ${language}`}
+            className="w-full h-32 p-2 font-mono border rounded"
+          />
+        </div>
 
-        <button type="submit"    className="px-4 py-2 text-white bg-indigo-600 rounded" >Add Problem</button>
+        <button type="submit" className="px-4 py-2 text-white bg-indigo-600 rounded">Add Problem</button>
       </form>
     </div>
   );
