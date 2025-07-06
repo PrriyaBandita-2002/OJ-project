@@ -11,22 +11,24 @@ if (!fs.existsSync(outputPath)) {
 // Compiles and executes C++ code with given input
 const executeCpp = (filepath, inputPath) => {
   const jobId = path.basename(filepath).split(".")[0];
-  const outPath = path.join(outputPath, `${jobId}.exe`);
+  const isWin = process.platform === "win32";
+  const exeExt = isWin ? ".exe" : "";
+  const outPath = path.join(outputPath, `${jobId}${exeExt}`);
 
   return new Promise((resolve, reject) => {
     // Compile C++ file with g++ and then execute it with input
-    exec(
-      `g++ ${filepath} -o ${outPath} && cd ${outputPath} && ./${jobId}.exe < ${inputPath}`,
-      (error, stdout, stderr) => {
-        if (error) {
-          reject({ error, stderr });
-        }
-        if (stderr) {
-          reject(stderr);
-        }
-        resolve(stdout);
+    const runCmd = isWin
+      ? `g++ "${filepath}" -o "${outPath}" && "${outPath}" < "${inputPath}"`
+      : `g++ "${filepath}" -o "${outPath}" && "${outPath}" < "${inputPath}"`;
+    exec(runCmd, (error, stdout, stderr) => {
+      if (error) {
+        reject({ error, stderr });
       }
-    );
+      if (stderr) {
+        reject(stderr);
+      }
+      resolve(stdout);
+    });
   });
 };
 

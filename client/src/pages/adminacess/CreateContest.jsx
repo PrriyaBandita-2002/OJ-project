@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
+const BASE_URL = import.meta.env.VITE_COMPILER_URL;
 export default function CreateContest() {
   const [form, setForm] = useState({
     title: "",
@@ -17,7 +17,7 @@ export default function CreateContest() {
   useEffect(() => {
     const fetchProblems = async () => {
       try {
-        const res = await axios.get("http://localhost:8000/api/problems");
+        const res = await axios.get(`${BASE_URL}/api/problems`);
         setAllProblems(res.data);
       } catch (err) {
         console.error("Failed to fetch problems", err);
