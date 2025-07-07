@@ -46,3 +46,11 @@ export const getContestById = async (req, res) => {
     res.status(500).json({ message: "Error fetching contest" });
   }
 };
+export const getContestsCount = async (req, res) => {
+  try {
+    const count = await Contest.countDocuments();
+    res.json({ count });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to get contests count" });
+  }
+};

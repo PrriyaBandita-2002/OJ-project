@@ -190,3 +190,11 @@ export const deleteProfile = async (req, res) => {
     res.status(500).json({ error: "Error deleting user" });
   }
 };
+export const getUserCount = async (req, res) => {
+  try {
+    const count = await User.countDocuments();
+    res.json({ count });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to get users count" });
+  }
+};

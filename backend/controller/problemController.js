@@ -134,3 +134,11 @@ export const deleteproblem = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+export const getProblemsCount = async (req, res) => {
+  try {
+    const count = await Problem.countDocuments();
+    res.json({ count });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to get problems count" });
+  }
+};

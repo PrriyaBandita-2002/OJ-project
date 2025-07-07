@@ -15,21 +15,25 @@ export default function Profile() {
   // Fetch user profile on load
   useEffect(() => {
     const fetchProfile = async () => {
-      try {
-        const res = await axios.get(`${BASE_URL}/api/auth/profile`, {
-          withCredentials: true,
-        });
-        setUser(res.data.user);
-        setFormData({
-          username: res.data.user.username,
-          email: res.data.user.email,
-        });
-      } catch (err) {
-        console.error('Failed to fetch profile:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.get(`${BASE_URL}/api/auth/profile`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    setUser(res.data.user);
+    setFormData({
+      username: res.data.user.username,
+      email: res.data.user.email,
+    });
+  } catch (err) {
+    console.error("Failed to fetch profile:", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
     fetchProfile();
   }, []);

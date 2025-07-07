@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-const BASE_URL = import.meta.env.VITE_COMPILER_URL;
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 export default function CreateContest() {
   const [form, setForm] = useState({
     title: "",
@@ -17,8 +17,8 @@ export default function CreateContest() {
   useEffect(() => {
     const fetchProblems = async () => {
       try {
-        const res = await axios.get(`${BASE_URL}/api/problems`);
-        setAllProblems(res.data);
+       const res = await axios.get(`http://localhost:8000/api/problems/problemlist`);
+    setAllProblems(res.data.data);
       } catch (err) {
         console.error("Failed to fetch problems", err);
       }
@@ -33,23 +33,24 @@ export default function CreateContest() {
     }));
   };
 
-  const handleProblemToggle = (problemId) => {
-    setForm((prev) => {
-      const exists = prev.problems.includes(problemId);
-      return {
-        ...prev,
-        problems: exists
-          ? prev.problems.filter((id) => id !== problemId)
-          : [...prev.problems, problemId],
-      };
-    });
-  };
+const handleProblemToggle = (problemId) => {
+  const id = String(problemId); 
+  console.log(form.problems)// ensure it's a string
+  setForm((prev) => {
+    const exists = prev.problems.includes(id);
+    const updated = exists
+      ? prev.problems.filter((pid) => pid !== id)
+      : [...prev.problems, id];
+    return { ...prev, problems: updated };
+  });
+};
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
-      await axios.post("http://localhost:8000/api/contests", form, {
+      await axios.post("http://localhost:8000/api/contests/create", form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("Contest created successfully!");
@@ -110,11 +111,13 @@ export default function CreateContest() {
               className="flex items-center p-2 border rounded cursor-pointer hover:bg-gray-50"
             >
               <input
-                type="checkbox"
-                className="mr-2"
-                checked={form.problems.includes(problem._id)}
-                onChange={() => handleProblemToggle(problem._id)}
-              />
+  type="checkbox"
+  className="mr-2"
+checked={form.problems.includes(String(problem._id))}
+
+  onChange={() => handleProblemToggle(problem._id)}
+/>
+
               {problem.title}
             </label>
           ))}

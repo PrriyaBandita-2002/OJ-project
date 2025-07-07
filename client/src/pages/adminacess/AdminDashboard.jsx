@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ListChecks,
@@ -11,8 +11,38 @@ import {
   LayoutDashboard
 } from 'lucide-react';
 
+import axios from 'axios';
+
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 const AdminDashboard = () => {
-  const navigate = useNavigate();
+    const navigate = useNavigate();
+
+  // State for counts
+  const [stats, setStats] = useState({
+    users: 0,
+    problems: 0,
+    contests: 0,
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const [usersRes, problemsRes, contestsRes] = await Promise.all([
+          axios.get(`http://localhost:8000/api/auth/count`),
+          axios.get(`${BASE_URL}/api/problems/count`),
+          axios.get(`${BASE_URL}/api/contests/count`),
+        ]);
+        setStats({
+          users: usersRes.data.count,
+          problems: problemsRes.data.count,
+          contests: contestsRes.data.count,
+        });
+      } catch (error) {
+        console.error("Failed to fetch dashboard stats:", error);
+      }
+    };
+    fetchStats();
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -72,17 +102,17 @@ const AdminDashboard = () => {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           <div className="p-4 bg-white shadow rounded-2xl">
             <h3 className="mb-2 text-lg font-semibold">Total Users</h3>
-            <p className="text-3xl font-bold text-blue-600">-</p>
+            <p className="text-3xl font-bold text-blue-600">{stats.users}</p>
           </div>
 
           <div className="p-4 bg-white shadow rounded-2xl">
             <h3 className="mb-2 text-lg font-semibold">Total Problems</h3>
-            <p className="text-3xl font-bold text-green-600">-</p>
+            <p className="text-3xl font-bold text-green-600">{stats.problems}</p>
           </div>
 
           <div className="p-4 bg-white shadow rounded-2xl">
             <h3 className="mb-2 text-lg font-semibold">Total Contests</h3>
-            <p className="text-3xl font-bold text-purple-600">-</p>
+            <p className="text-3xl font-bold text-purple-600">{stats.contests}</p>
           </div>
         </div>
       </div>

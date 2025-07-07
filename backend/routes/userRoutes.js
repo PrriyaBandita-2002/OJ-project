@@ -6,6 +6,7 @@ import {
   updateUserRole,
   deleteProfile,
   updateProfile,
+  getUserCount,
 } from "../controller/userController.js";
 import {
   signupValidation,
@@ -33,7 +34,7 @@ router.get("/profile", verifyToken, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-
+router.get("/count", getUserCount);
 //  admin route
 router.get("/admin-only", verifyToken, isAdmin, (req, res) => {
   res.status(200).json({ message: "Welcome, admin!" });
