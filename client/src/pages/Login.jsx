@@ -29,6 +29,7 @@ const Login = () => {
 
     if (response.data.token) {
       const token = response.data.token;
+      console.log(token);
       localStorage.setItem("token", token);
 localStorage.setItem("userId", response.data.user._id);
       // 👇 Decode token to get role

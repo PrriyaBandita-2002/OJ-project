@@ -12,8 +12,8 @@ import {
   signupValidation,
   loginValidation,
 } from "../Middleware/authMiddleware.js";
-import { verifyToken } from "../Middleware/verifyToken.js";
-import { isAdmin } from "../Middleware/isAdmin.js";
+import verifyToken from "../Middleware/verifyToken.js";
+import isAdmin from "../Middleware/isAdmin.js";
 
 import User from "../models/users.model.js";
 const router = express.Router();

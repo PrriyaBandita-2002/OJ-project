@@ -1,5 +1,5 @@
 import express from "express";
-import { verifyToken } from "../Middleware/verifyToken.js";
+import verifyToken from "../Middleware/verifyToken.js";
 import { submitSolution } from "../controller/submission.controller.js";
 import {
   getFullStats,

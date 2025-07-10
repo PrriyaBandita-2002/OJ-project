@@ -5,8 +5,8 @@ import {
   getContestById,
   getContestsCount,
 } from "../controller/contestController.js";
-import { verifyToken } from "../Middleware/verifyToken.js";
-import { isAdmin } from "../Middleware/isAdmin.js";
+import verifyToken from "../Middleware/verifyToken.js";
+import isAdmin from "../Middleware/isAdmin.js";
 
 const router = express.Router();
 

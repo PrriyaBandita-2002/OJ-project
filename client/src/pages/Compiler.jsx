@@ -50,6 +50,8 @@ export default function CompilerApp() {
   const [output, setOutput] = useState('');
   const [lang, setLang] = useState('Cpp');
   const [aiReview, setAiReview] = useState('');
+  const [isReviewing, setIsReviewing] = useState(false);
+
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -72,16 +74,19 @@ export default function CompilerApp() {
       setIsLoading(false);
     }
   };
+const handleAiReview = async () => {
+  setIsReviewing(true);
+  setAiReview(''); // Clear previous
+  try {
+    const { data } = await axios.post(REVIEW_URL, { code });
+    setAiReview(data.review);
+  } catch (error) {
+    setAiReview('Error in AI review: ' + error.message);
+  } finally {
+    setIsReviewing(false);
+  }
+};
 
-  const handleAiReview = async () => {
-    try {
-      const { data } = await axios.post(REVIEW_URL, { code });
-      
-      setAiReview(data.review);
-    } catch (error) {
-      setAiReview('Error in AI review: ' + error.message);
-    }
-  };
 
   const languages = ['C', 'Cpp', 'Java', 'Python'];
 
@@ -174,10 +179,13 @@ export default function CompilerApp() {
               className="flex-1 px-4 py-2 font-medium text-white transition bg-blue-600 rounded-lg hover:bg-blue-700"
             >{isLoading ? 'Running...' : 'Run Code'}</button>
 
-            <button
-              onClick={handleAiReview}
-              className="flex-1 px-4 py-2 font-medium text-white transition bg-green-600 rounded-lg hover:bg-green-700"
-            >AI Review</button>
+          <button
+  onClick={handleAiReview}
+  disabled={isReviewing}
+  className="flex-1 px-4 py-2 font-medium text-white transition bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+>
+  {isReviewing ? 'Reviewing...' : 'AI Review'}
+</button>
           </div>
         </div>
       </div>

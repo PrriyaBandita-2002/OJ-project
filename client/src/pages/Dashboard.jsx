@@ -75,6 +75,9 @@ useEffect(() => {
         <Link to="/submission" className="flex items-center gap-3 p-2 rounded hover:bg-gray-700">
           <FileText className="w-5 h-5" /> My Submissions
         </Link>
+          <Link to="/solution" className="flex items-center gap-3 p-2 rounded hover:bg-gray-700">
+          <FileText className="w-5 h-5" /> Hints to some problems
+        </Link>
       </div>
 
       {/* Main Panel */}

@@ -40,7 +40,7 @@ const AddProblem = () => {
     constraints: [""],
     topics: [""],
     example_cases: [{ input: "", output: "" }],
-    test_cases: [{ input: "", output: "" }],
+    test_cases: [{ input: "", output: "" , hidden: false }],
   });
 
   const handleChange = (e) => {
@@ -86,7 +86,7 @@ const AddProblem = () => {
   };
 
   const addTestCase = () => {
-    setForm({ ...form, test_cases: [...form.test_cases, { input: "", output: "" }] });
+    setForm({ ...form, test_cases: [...form.test_cases, { input: "", output: "",hidden:"" }] });
   };
 
   const addConstraint = () => {
@@ -177,6 +177,7 @@ const AddProblem = () => {
                 placeholder="Output"
                 className="w-full p-2 border rounded"
               />
+              
             </div>
           ))}
           <button type="button" onClick={addExampleCase} className="text-sm text-blue-500">+ Add Example Case</button>
@@ -198,6 +199,14 @@ const AddProblem = () => {
                 placeholder="Output"
                 className="w-full p-2 border rounded"
               />
+               <label className="flex items-center space-x-2 text-sm text-gray-700">
+        <input
+          type="checkbox"
+          checked={tc.hidden}
+          onChange={(e) => handleArrayChange("test_cases", idx, "hidden", e.target.checked)}
+        />
+        <span>Hidden Test Case</span>
+      </label>
             </div>
           ))}
           <button type="button" onClick={addTestCase} className="text-sm text-blue-500">+ Add Test Case</button>

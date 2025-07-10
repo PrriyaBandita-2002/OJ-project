@@ -1,18 +1,7 @@
 import mongoose from "mongoose";
 
-// Define sub-schemas
+// Example case sub-schema (for display purposes)
 const exampleCaseSchema = new mongoose.Schema({
-  input: {
-    type: String,
-    required: true,
-  },
-  output: {
-    type: String,
-    required: true,
-  },
-});
-
-const testCaseSchema = new mongoose.Schema({
   input: {
     type: String,
     required: true,
@@ -30,6 +19,7 @@ const problemSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      unique: true, // Prevent duplicate titles
     },
     description: {
       type: String,
@@ -43,22 +33,23 @@ const problemSchema = new mongoose.Schema(
     constraints: {
       type: [String],
       required: true,
+      validate: (v) => v.length > 0,
     },
     topics: {
       type: [String],
       required: true,
+      validate: (v) => v.length > 0,
     },
     acceptance: {
       type: Number,
-      default: 0, // You can calculate dynamically later if needed
+      min: 0,
+      max: 100,
+      default: 0,
     },
     example_cases: {
       type: [exampleCaseSchema],
       required: true,
-    },
-    test_cases: {
-      type: [testCaseSchema],
-      required: true,
+      validate: (v) => v.length > 0,
     },
     input_format: {
       type: String,
@@ -68,10 +59,16 @@ const problemSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-
     starter_code: {
-      type: String,
-      required: false, // or true if you want to make it mandatory
+      type: Map,
+      of: String,
+      default: {},
+    },
+
+    contest: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Contest",
+      default: null,
     },
   },
   { timestamps: true }

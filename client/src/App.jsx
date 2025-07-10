@@ -17,6 +17,7 @@ import ContestDetail from "./pages/ContestDetail";
 import CreateContest from "./pages/adminacess/CreateContest";
 import EditProblem from "./pages/adminacess/EditProblem";
 import Submission from "./pages/submission";
+import Solution from "./components/Hint"
 function App() {
   return (
     <div className="App">
@@ -108,6 +109,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          }
+        />
+           <Route
+          path="/solution"
+          element={
+            <ProtectedRoute>
+              <Solution />
             </ProtectedRoute>
           }
         />

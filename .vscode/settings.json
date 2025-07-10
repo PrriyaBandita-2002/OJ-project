@@ -3,5 +3,6 @@
     "inlineChat.enableV2": false,
     "accessibility.verbosity.inlineChat": false,
     "inlineChat.holdToSpeech": false,
-    "inlineChat.lineNaturalLanguageHint": false
+    "inlineChat.lineNaturalLanguageHint": false,
+    "git.ignoreLimitWarning": true
 }

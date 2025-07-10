@@ -25,35 +25,38 @@ export default function ContestDetail() {
     fetchContest();
   }, [id]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (!contest || accessGranted) return;
+useEffect(() => {
+  const interval = setInterval(() => {
+    if (!contest || accessGranted) return;
 
-      const start = new Date(contest.startTime).getTime();
-      const now = Date.now();
-      const distance = start - now;
+    const start = new Date(contest.startTime).getTime();
+    const now = Date.now();
+    const distance = start - now;
 
-      if (distance <= 0) {
-        window.location.reload(); // or call fetchContest again
-      }
+    if (distance <= 0) {
+      window.location.reload(); // Trigger access refresh
+    }
 
-      const h = Math.floor(distance / (1000 * 60 * 60));
-      const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const s = Math.floor((distance % (1000 * 60)) / 1000);
-      setCountdown(`${h}h ${m}m ${s}s`);
-    }, 1000);
+    const h = Math.floor(distance / (1000 * 60 * 60));
+    const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const s = Math.floor((distance % (1000 * 60)) / 1000);
+    setCountdown(`${h}h ${m}m ${s}s`);
+  }, 1000);
 
-    return () => clearInterval(interval);
-  }, [contest, accessGranted]);
+  return () => clearInterval(interval);
+}, [contest, accessGranted]);
 
-  if (!accessGranted) {
-    return (
-      <div className="p-6 text-center">
-        <h1 className="text-xl font-semibold">Contest Locked</h1>
-        <p>Starts in: {countdown}</p>
-      </div>
-    );
-  }
+
+if (!accessGranted) {
+  return (
+    <div className="p-6 text-center">
+      <h1 className="text-2xl font-bold text-red-600">⏳ Contest Not Started</h1>
+      <p className="mt-2 text-gray-700">This contest will be available when the timer ends.</p>
+      <p className="mt-4 font-mono text-lg">{countdown}</p>
+    </div>
+  );
+}
+
 
   if (!contest) return <p>Loading...</p>;
 

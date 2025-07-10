@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 
 const testResultSchema = new mongoose.Schema({
-  input: String,
-  expectedOutput: String,
-  userOutput: String,
-  passed: Boolean,
-  execTime: Number,
+  input: { type: String, required: true },
+  expectedOutput: { type: String, required: true },
+  userOutput: { type: String, required: true, default: "Execution Failed" },
+  passed: { type: Boolean, required: true },
+  execTime: { type: Number, default: 0 },
 });
 
 const submissionSchema = new mongoose.Schema(
@@ -65,13 +65,6 @@ const submissionSchema = new mongoose.Schema(
     total: {
       type: Number,
     },
-
-    // Optional: Add user reference in the future
-    // user: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "User",
-    //   required: false
-    // },
   },
   { timestamps: true }
 );

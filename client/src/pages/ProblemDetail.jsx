@@ -317,7 +317,8 @@ import 'highlight.js/styles/github.css';
 import axios from 'axios';
 
 const BACK_URL = import.meta.env.VITE_BACKEND_URL;
-const REVIEW_URL = import.meta.env.VITE_GOOGLE_GEMINI_API_URL;
+const REVIEW_URL = `${BACK_URL}/api/ai-review`;
+
 const defaultCodes = {
   cpp: '#include<iostream>\nusing namespace std;\n\nint main() {\n    // your code here\n    return 0;\n}',
   java: 'public class Main {\n    public static void main(String[] args) {\n        // your code here\n    }\n}',
@@ -335,6 +336,8 @@ const ProblemDetail = () => {
   const [language, setLanguage] = useState('cpp');
   const [submissionSummary, setSubmissionSummary] = useState(null);
   const [aiReview, setAiReview] = useState('');
+  const [reviewLoading, setReviewLoading] = useState(false);
+
   // Load problem and starter code
 useEffect(() => {
   const fetchProblem = async () => {
@@ -379,16 +382,44 @@ useEffect(() => {
   }
 }, [id, language, code]);
 
-  const handleAiReview = async () => {
-    try {
-      // Send both code and language to the AI review endpoint
-      const { data } = await axios.post(REVIEW_URL, { code, language });
-      setAiReview(data.review);
-    } catch (error) {
-      // Show more details for debugging
-      setAiReview('Error in AI review: ' + (error.response?.data?.message || error.message));
-    }
-  };
+const handleAiReview = async () => {
+  setReviewLoading(true);
+  try {
+    const { data } = await axios.post(REVIEW_URL, {
+      code,
+      language,
+      problem: {
+        title: problem.title,
+        description: problem.description,
+        input_format: problem.input_format,
+        output_format: problem.output_format,
+        constraints: problem.constraints,
+        examples: problem.example_cases, // or adjust if key is different
+      },
+    });
+console.log("Sending to AI Review:", {
+  code,
+  language,
+  problem: {
+    title: problem.title,
+    description: problem.description,
+    input_format: problem.input_format,
+    output_format: problem.output_format,
+    constraints: problem.constraints,
+    examples: problem.example_cases,
+  },
+});
+
+    setAiReview(data.review);
+  } catch (error) {
+    setAiReview(
+      "Error in AI review: " + (error.response?.data?.message || error.message)
+    );
+  } finally {
+    setReviewLoading(false);
+  }
+};
+
 
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
@@ -403,17 +434,28 @@ useEffect(() => {
     setOutput('');
     try {
       const token = localStorage.getItem("token");
+        if (!token) {
+      console.error("[AUTH] No token found in localStorage.");
+      alert("You must be logged in to submit code.");
+      return;
+    }
+
           console.log(`[SUBMIT] Submitting code for ${language}:`, code);
+          console.log("Sending payload:", { problemId: id, language, code });
+
       const res = await axios.post(`${BACK_URL}/api/submit`, {
         problemId: id,
         language,
         code,
       }, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` , "Content-Type": "application/json",},
       });
 
+    console.log("[RESPONSE] Raw response:", res);
       const { verdict, testResults, problemTitle, timestamp } = res.data;
+      console.log(res.data);
       console.log(`[SUBMIT SUCCESS] Verdict:`, verdict);
+       console.log("[SUCCESS] Test Results:", testResults);
       const passedCount = testResults.filter((t) => t.passed).length;
 
       setSubmissionSummary({
@@ -425,20 +467,32 @@ useEffect(() => {
         code,
       });
  localStorage.setItem("submissionSuccess", "true");
-      const formattedOutput =
-        `Verdict: ${verdict}\n\n` +
-        testResults.map((test, index) =>
-          `Testcase ${index + 1}:\nInput:\n${test.input}\nExpected Output:\n${test.output}\nYour Output:\n${test.userOutput}\nResult: ${test.passed ? 'Passed' : 'Failed'}\n`
-        ).join('\n');
+ const formattedOutput =
+  `Verdict: ${verdict}\n\n` +
+  testResults.map((test, index) =>
+    `Testcase ${index + 1}:\n` +
+    `Input:\n${test.input}\n` +
+    `Expected Output:\n${test.expectedOutput}\n` +
+    `Your Output:\n${test.userOutput}\n` +
+    `Result: ${test.passed ? 'Passed ' : 'Failed'}\n`
+  ).join('\n');
+
+
 
       setOutput(formattedOutput);
       setActiveTab("submission");
-    } catch (err) {
-      console.error("Submission failed:", err);
-    } finally {
-      setIsLoading(false);
+    }  catch (err) {
+    console.error("[ERROR] Submission failed:", err);
+    if (err.response) {
+      console.error("[ERROR] Server responded with:", err.response.data);
+      alert(`Submission Error: ${err.response.data?.error || "Unknown error"}`);
+    } else {
+      alert("Network or unexpected error occurred during submission.");
     }
-  };
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const languageOptions = [
     { label: 'C++', value: 'cpp' },
@@ -505,14 +559,20 @@ useEffect(() => {
   if (activeTab === "review") {
     return (
       <div className="space-y-4 text-sm">
-        <button
-          onClick={handleAiReview}
-          className="w-full px-4 py-2 text-sm font-semibold text-indigo-700 border border-indigo-400 rounded hover:bg-indigo-50"
-        >
-          🤖 Review with AI
-        </button>
+     <button
+  onClick={handleAiReview}
+  disabled={reviewLoading}
+  className={`w-full px-4 py-2 text-sm font-semibold border rounded ${
+    reviewLoading
+      ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+      : 'text-indigo-700 border-indigo-400 hover:bg-indigo-50'
+  }`}
+>
+  {reviewLoading ? 'Reviewing...' : '🤖 Get AI Code Review'}
+</button>
+
         <div className="overflow-y-auto prose-sm prose text-gray-800 max-w-none" style={{ maxHeight: "300px" }}>
-          {aiReview ? <ReactMarkdown>{aiReview}</ReactMarkdown> : <p className="text-gray-500">Click the button above to get feedback on your code.</p>}
+          {aiReview ? <ReactMarkdown>{aiReview}</ReactMarkdown> : <p className="text-gray-500">Click the button (only once/not more than that) above to get feedback on your code.</p>}
         </div>
       </div>
     );
@@ -561,8 +621,8 @@ useEffect(() => {
         <div className="border rounded bg-white shadow-sm h-[300px] overflow-y-auto">
           <Editor
             value={code}
-            onValueChange={setCode}
-            highlight={code => highlight(code, Prism.languages[language], language)}
+        onValueChange={(newCode) => setCode(newCode)}
+highlight={code => highlight(code, Prism.languages[language] || Prism.languages.cpp, language)}
             padding={12}
             style={{
               fontFamily: '"Fira Code", monospace',

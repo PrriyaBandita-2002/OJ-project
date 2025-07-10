@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import Problem from "../models/problem.model.js";
 import Submission from "../models/submission.js";
 import mongoose from "mongoose";
+import TestCase from "../models/testcase.model.js";
 // Required once if not done in server.js
 
 const normalize = (text) => (text || "").trim();
@@ -11,38 +12,77 @@ dotenv.config();
 
 // ------------------ SUBMIT SOLUTION ------------------
 export const submitSolution = async (req, res) => {
+  console.log("[DEBUG] Raw body:", req.body);
   const { problemId, code, language } = req.body;
-  console.log("Received Submission:", { problemId, language });
+  console.log("Received Submission:", { problemId, language, code });
+
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({ error: "Unauthorized: No user found" });
+  }
 
   try {
+    if (!problemId || !code || !language) {
+      console.log("[ERROR] Missing one of problemId, code, or language");
+      return res.status(400).json({ error: "Missing required fields" });
+    }
     const problem = await Problem.findById(problemId);
     if (!problem) {
       return res.status(404).json({ error: "Problem not found" });
     }
 
-    let allPassed = true;
+    console.log("[INFO] Fetching test cases...");
+    const testCases = await TestCase.find({ problem: problemId });
+    if (!testCases || testCases.length === 0) {
+      console.log("[ERROR] No test cases found for problem");
+      return res
+        .status(400)
+        .json({ error: "No test cases found for this problem" });
+    }
+
+    const normalize = (text) => (text || "").toString().trim();
     const testResults = [];
+    let allPassed = true;
 
-    for (const testCase of problem.test_cases) {
-      const start = Date.now();
-      const response = await axios.post(`${process.env.COMPILER_URL}/run`, {
-        language,
-        code,
-        input: testCase.input,
-      });
-      const execTime = Date.now() - start;
-      const userOutput = response.data.output || "";
+    for (const testCase of testCases) {
+      try {
+        const start = Date.now();
+        const response = await axios.post(`${process.env.COMPILER_URL}/run`, {
+          language,
+          code,
+          input: testCase.input,
+        });
 
-      const passed = normalize(userOutput) === normalize(testCase.output);
-      if (!passed) allPassed = false;
+        const execTime = Date.now() - start;
+        const userOutput = response.data.output || "";
+        const expectedOutput = testCase.output;
+        const passed = normalize(userOutput) === normalize(expectedOutput);
 
-      testResults.push({
-        input: testCase.input,
-        expectedOutput: testCase.output,
-        userOutput,
-        passed,
-        execTime,
-      });
+        if (!passed) allPassed = false;
+
+        testResults.push({
+          input: testCase.hidden ? "[HIDDEN]" : testCase.input,
+          expectedOutput: testCase.hidden ? "[HIDDEN]" : testCase.output,
+          userOutput: userOutput.trim(),
+          passed,
+          execTime,
+          hidden: testCase.hidden,
+        });
+      } catch (execError) {
+        console.log(
+          "[ERROR] Execution failed for one test case:",
+          execError.message
+        );
+        allPassed = false;
+        testResults.push({
+          input: testCase.hidden ? "[HIDDEN]" : testCase.input,
+          expectedOutput: testCase.hidden ? "[HIDDEN]" : testCase.output,
+
+          userOutput: "Execution Failed",
+          passed: false,
+          execTime: 0,
+          hidden: testCase.hidden,
+        });
+      }
     }
 
     const verdict = allPassed ? "Accepted" : "Wrong Answer";
@@ -60,7 +100,7 @@ export const submitSolution = async (req, res) => {
     });
 
     await newSubmission.save();
-
+    console.log(`[SUCCESS] Verdict: ${verdict}`);
     return res.status(200).json({
       verdict,
       testResults,
@@ -74,6 +114,89 @@ export const submitSolution = async (req, res) => {
       .json({ error: error.message || "Internal server error" });
   }
 };
+
+// export const submitSolution = async (req, res) => {
+//   console.log("[DEBUG] Raw body:", req.body);
+//   const { problemId, code, language } = req.body;
+//   console.log("Received Submission:", { problemId, language, code });
+//   if (!req.user || !req.user.id) {
+//     return res.status(401).json({ error: "Unauthorized: No user found" });
+//   }
+//   if (!problemId || !code || !language) {
+//     return res.status(400).json({ error: "Missing required fields" });
+//   }
+//   try {
+//     const problem = await Problem.findById(problemId);
+
+//     if (!problem) {
+//       return res.status(404).json({ error: "Problem not found" });
+//     }
+
+//     const testCases = await TestCase.find({ problem: problemId });
+//     if (testCases.length === 0) {
+//       console.warn(`No test cases found for problem ${problemId}`);
+//       return res.status(400).json({
+//         error: `No test cases found for problem ${problemId}.`,
+//       });
+//     }
+//     const normalize = (text) => (text || "").toString().trim();
+//     const testResults = [];
+//     let allPassed = true;
+
+//     for (const testCase of testCases) {
+//       const start = Date.now();
+//       const response = await axios.post(`${process.env.COMPILER_URL}/run`, {
+//         language,
+//         code,
+//         input: testCase.input,
+//       });
+//       const execTime = Date.now() - start;
+//       const userOutput = response.data.output || "";
+
+//       const expectedOutput = testCase.expectedOutput || testCase.output; // fallback
+//       const passed = normalize(userOutput) === normalize(expectedOutput);
+
+//       if (!passed) allPassed = false;
+
+//       testResults.push({
+//         input: testCase.hidden ? "[HIDDEN]" : testCase.input,
+//         expectedOutput,
+//         userOutput,
+//         passed,
+//         execTime,
+//         hidden: testCase.hidden,
+//       });
+//     }
+
+//     const verdict = allPassed ? "Accepted" : "Wrong Answer";
+
+//     const newSubmission = new Submission({
+//       user: req.user.id,
+//       problem: problemId,
+//       problemTitle: problem.title,
+//       language,
+//       code,
+//       verdict,
+//       testResults,
+//       passed: testResults.filter((t) => t.passed).length,
+//       total: testResults.length,
+//     });
+
+//     await newSubmission.save();
+
+//     return res.status(200).json({
+//       verdict,
+//       testResults,
+//       problemTitle: problem.title,
+//       timestamp: newSubmission.createdAt,
+//     });
+//   } catch (error) {
+//     console.error("Submission error:", error);
+//     return res
+//       .status(500)
+//       .json({ error: error.message || "Internal server error" });
+//   }
+// };
 // ------------------ GET STATS ------------------
 export const getFullStats = async (req, res) => {
   const { userId } = req.params;
@@ -148,7 +271,7 @@ export const getFullStats = async (req, res) => {
       },
       {
         $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$submittedAt" } },
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
           count: { $sum: 1 },
         },
       },
@@ -185,7 +308,7 @@ export const getUserSubmissions = async (req, res) => {
     const { userId } = req.params;
 
     const submissions = await Submission.find({ user: userId })
-      .sort({ submittedAt: -1 })
+      .sort({ createdAt: -1 })
       .select(
         "problem problemTitle verdict passed total createdAt submittedAt"
       );

@@ -28,7 +28,18 @@ export default function Contest() {
               key={contest._id}
               className="p-4 transition border rounded-lg shadow-sm hover:shadow-md"
             >
-              <h2 className="text-xl font-semibold">{contest.title}</h2>
+<div className="flex items-center gap-2">
+  <h2 className="text-xl font-semibold">{contest.title}</h2>
+  {new Date(contest.startTime) > new Date() ? (
+    <span className="px-2 py-0.5 text-xs text-blue-600 bg-blue-100 rounded">Upcoming</span>
+  ) : new Date(contest.endTime) < new Date() ? (
+    <span className="px-2 py-0.5 text-xs text-gray-600 bg-gray-100 rounded">Ended</span>
+  ) : (
+    <span className="px-2 py-0.5 text-xs text-green-700 bg-green-100 rounded">Live</span>
+  )}
+</div>
+
+
               <p>{contest.description}</p>
               <p className="text-sm text-gray-500">
                 Start: {new Date(contest.startTime).toLocaleString()} | End:{" "}

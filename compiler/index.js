@@ -26,19 +26,19 @@ app.get("/", (req, res) => {
 });
 app.post("/ai-review", async (req, res) => {
   const { code } = req.body;
-  if (!code) {
-    return res.status(400).json({ success: false, error: "Empty code!" });
+  if (code === undefined) {
+    return res.status(404).json({ success: false, error: "Empty code!" });
   }
-
   try {
     const review = await aiCodeReview(code);
     res.json({ review: review });
   } catch (error) {
-    res.status(500).json({
-      error: "Error in AI review, error: " + error.message,
-    });
+    res
+      .status(500)
+      .json({ error: "Error in AI review, error: " + error.message });
   }
 });
+
 // Main endpoint to compile and run C++ code
 app.post("/run", async (req, res) => {
   // Extract language, code, and input from request body with defaults

@@ -9,6 +9,8 @@ import TestCaseRoutes from "./routes/testcaseRoutes.js";
 import SolutionRoutes from "./routes/solutionRoutes.js";
 import submissionRoutes from "./routes/submission.routes.js";
 import contestRoutes from "./routes/contest.routes.js";
+import aiReviewRoute from "./ai-review.js";
+// import aiChatRoute from "./ai-chat.js";
 dotenv.config();
 
 const app = express();
@@ -27,6 +29,9 @@ app.get("/api/solutions", SolutionRoutes);
 app.get("/api/testcases", TestCaseRoutes);
 app.use("/api/submit", submissionRoutes);
 app.use("/api/contests", contestRoutes);
+app.use("/api/ai-review", aiReviewRoute);
+// app.use("/api/ai-chat", aiChatRoute);
+
 app.get("/", (req, res) => {
   res.status(200).json({
     message: "OJ Auth Server is running!",
