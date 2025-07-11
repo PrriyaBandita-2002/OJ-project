@@ -111,7 +111,7 @@ print("Sum is:", num1 + num2)`,
         <p className="mb-6 text-lg text-gray-600">
           Improve your coding skills with real contests and curated problems.
         </p>
-        <a href="/ProblemsList" className="px-6 py-3 text-white bg-blue-600 rounded shadow hover:bg-blue-700">
+        <a href="/signup" className="px-6 py-3 text-white bg-blue-600 rounded shadow hover:bg-blue-700">
           Get Started
         </a>
       </section>
