@@ -12,9 +12,9 @@ dotenv.config();
 
 // ------------------ SUBMIT SOLUTION ------------------
 export const submitSolution = async (req, res) => {
-  console.log("[DEBUG] Raw body:", req.body);
+  // console.log("[DEBUG] Raw body:", req.body);
   const { problemId, code, language } = req.body;
-  console.log("Received Submission:", { problemId, language, code });
+  // console.log("Received Submission:", { problemId, language, code });
 
   if (!req.user || !req.user.id) {
     return res.status(401).json({ error: "Unauthorized: No user found" });

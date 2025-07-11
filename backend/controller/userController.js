@@ -7,7 +7,7 @@ import cookieParser from "cookie-parser";
 const registerUser = async (req, res) => {
   try {
     const { firstname, lastname, username, dob, email, password } = req.body;
-    console.log("Received user data:", req.body);
+    // console.log("Received user data:", req.body);
 
     if (!(firstname && lastname && username && dob && email && password)) {
       return res.status(400).json({

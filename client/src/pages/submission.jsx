@@ -12,7 +12,7 @@ const Submissions = () => {
       try {
         const res = await axios.get(`${BASE_URL}/api/submit/user/${userId}`);
         setSubmissions(res.data.submissions);
-        console.log(res.data.submissions);
+        // console.log(res.data.submissions);
       } catch (error) {
         console.error("Failed to fetch submissions", error);
       }

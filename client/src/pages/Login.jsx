@@ -29,17 +29,17 @@ const Login = () => {
 
     if (response.data.token) {
       const token = response.data.token;
-      console.log(token);
+      // console.log(token);
       localStorage.setItem("token", token);
 localStorage.setItem("userId", response.data.user._id);
-      // 👇 Decode token to get role
+      
       const decoded = jwtDecode(token);
       const role = decoded.role || decoded.user?.role;
 
-      // 👇 Save role in localStorage too (optional but useful)
+
       localStorage.setItem("role", role);
 
-      // 👇 Navigate based on role
+     
       if (role === "admin") {
         navigate("/admindashboard");
       } else {
