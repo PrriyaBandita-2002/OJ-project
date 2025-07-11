@@ -132,7 +132,7 @@ GEMINI_API_KEY=your_google_genai_api_key
 
 ##  Author
 
-Developed with ❤️ by \Prriya
+Developed with ❤️ by Prriya
 
 
 
