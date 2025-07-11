@@ -11,7 +11,7 @@ A full-stack Online Judge (OJ) platform built with the MERN stack. Supports comp
 
 ###  Core Functionality
 - Problem Bank: Create, edit, and manage coding problems with constraints, examples, hidden test cases, and starter code.
-- Code Editor: LeetCode-style editor with syntax highlighting using Prism.js, supporting C/C++, Java, and Python.
+- Code Editor: Editor with syntax highlighting using Prism.js, supporting C/C++, Java, and Python.
 - Test Case Evaluation: Automatic evaluation using public and hidden test cases.
 - Submissions: Stores each submission with verdicts, runtime, test case results, and timestamps.
 
@@ -56,13 +56,13 @@ A full-stack Online Judge (OJ) platform built with the MERN stack. Supports comp
 
 
 ##  Project Structure
+-client              # React frontend
+-server              # Express backend
+-server/models       # MongoDB models (User, Problem, TestCase, Submission, Contest)
+-docker              # Docker container setup for code execution
 
 ```
 
-/client              # React frontend
-/server              # Express backend
-/server/models       # MongoDB models (User, Problem, TestCase, Submission, Contest)
-/docker              # Docker container setup for code execution
 
 ````
 
