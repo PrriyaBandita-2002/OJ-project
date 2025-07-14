@@ -17,7 +17,7 @@ export default function CreateContest() {
   useEffect(() => {
     const fetchProblems = async () => {
       try {
-       const res = await axios.get(`http://localhost:8000/api/problems/problemlist`);
+       const res = await axios.get(`${BASE_URL}/api/problems/problemlist`);
     setAllProblems(res.data.data);
       } catch (err) {
         console.error("Failed to fetch problems", err);
