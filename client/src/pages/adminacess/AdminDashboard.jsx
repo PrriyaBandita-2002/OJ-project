@@ -28,7 +28,7 @@ const AdminDashboard = () => {
     const fetchStats = async () => {
       try {
         const [usersRes, problemsRes, contestsRes] = await Promise.all([
-          axios.get(`http://localhost:8000/api/auth/count`),
+          axios.get(`${BASE_URL}/api/auth/count`),
           axios.get(`${BASE_URL}/api/problems/count`),
           axios.get(`${BASE_URL}/api/contests/count`),
         ]);
