@@ -15,7 +15,7 @@ function Home() {
   const navigate = useNavigate();
 
   const templates = {
-    "C++": `#include <iostream>
+    Cpp: `#include <iostream>
 using namespace std;
 
 int main() {
@@ -48,19 +48,19 @@ print("Sum is:", num1 + num2)`,
   };
 
   const prismMap = {
-    "C++": "cpp",
+    Cpp: "cpp",
     C: "c",
     Java: "java",
     Python: "python",
   };
 
   const [lang, setLang] = useState("Cpp");
-  const [code, setCode] = useState(templates["C++"]);
+  const [code, setCode] = useState(templates["Cpp"]);
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const languages = ["C++", "C", "Java", "Python"];
+  const languages = ["Cpp", "C", "Java", "Python"];
 
   const handleSubmit = async () => {
     if (isLoading) return;
@@ -172,7 +172,7 @@ print("Sum is:", num1 + num2)`,
               className="flex items-center px-3 py-1 text-sm text-white bg-green-600 rounded hover:bg-green-700"
               onClick={handleSubmit}
             >
-              ▶ Run
+               Run
             </button>
             <button
               className="flex items-center px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700"

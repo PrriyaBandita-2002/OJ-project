@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+const BACK_URL = import.meta.env.VITE_BACKEND_URL;
 export default function Contest() {
   const [contests, setContests] = useState([]);
 
   useEffect(() => {
     const fetchContests = async () => {
       try {
-        const res = await axios.get("http://localhost:8000/api/contests");
+        const res = await axios.get(`${BACK_URL}/api/contests`);
         setContests(res.data);
       } catch (error) {
         console.error("Error fetching contests:", error);

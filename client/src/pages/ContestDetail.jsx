@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-
+const BACK_URL = import.meta.env.VITE_BACKEND_URL;
 export default function ContestDetail() {
   const { id } = useParams();
   const [contest, setContest] = useState(null);
@@ -11,7 +11,7 @@ export default function ContestDetail() {
   useEffect(() => {
     const fetchContest = async () => {
       try {
-        const res = await axios.get(`http://localhost:8000/api/contests/${id}`);
+        const res = await axios.get(`${BACK_URL}/api/contests/${id}`);
         setContest(res.data);
         setAccessGranted(true);
       } catch (err) {
