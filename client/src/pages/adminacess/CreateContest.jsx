@@ -50,7 +50,7 @@ const handleProblemToggle = (problemId) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
-      await axios.post("http://localhost:8000/api/contests/create", form, {
+      await axios.post(`${BASE_URL}/api/contests/create`, form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("Contest created successfully!");
