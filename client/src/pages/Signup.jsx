@@ -24,7 +24,7 @@ const Signup = () => {
 
     try {
       const response = await axios.post(
-        `${BASE_URL}/api/auth/register`,
+        `https://oj-project-4-3sr4.onrender.com/api/auth/register`,
         { firstname, lastname, username, email, dob, password },
         {
           headers: {
