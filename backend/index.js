@@ -16,12 +16,17 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-app.use(
-  cors({
-    origin: "https://oj-project-xi.vercel.app", // your frontend domain
-    credentials: true, // allow cookies
-  })
-);
+const FRONTEND_ORIGIN = "https://oj-project-xi.vercel.app";
+
+app.use(cors({
+  origin: FRONTEND_ORIGIN,
+  credentials: true,
+}));
+
+app.options("*", cors({
+  origin: FRONTEND_ORIGIN,
+  credentials: true,
+}));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
