@@ -18,7 +18,17 @@ const PORT = process.env.PORT || 8080;
 
 const FRONTEND_ORIGIN = "https://www.iiya.me";
 
-app.use(cors({ origin: "https://oj-project-xi.vercel.app", credentials: true }));
+const allowedOrigins = ["https://oj-project-xi.vercel.app", "https://www.iiya.me"];
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+}));
 
 
 
