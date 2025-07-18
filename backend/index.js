@@ -18,10 +18,7 @@ const PORT = process.env.PORT || 8080;
 
 const FRONTEND_ORIGIN = "https://www.iiya.me";
 
-app.use(cors({
-  origin: FRONTEND_ORIGIN,
-  credentials: true,
-}));
+app.use(cors());
 
 
 
