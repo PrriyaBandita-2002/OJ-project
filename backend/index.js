@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 8080;
 
 const FRONTEND_ORIGIN = "https://www.iiya.me";
 
-app.use(cors());
+app.use(cors({ origin: "https://oj-project-xi.vercel.app", credentials: true }));
 
 
 
