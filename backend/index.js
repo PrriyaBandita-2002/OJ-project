@@ -16,7 +16,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-const FRONTEND_ORIGIN = "https://oj-project-xi.vercel.app";
+const FRONTEND_ORIGIN = "https://www.iiya.me";
 
 app.use(cors({
   origin: FRONTEND_ORIGIN,
