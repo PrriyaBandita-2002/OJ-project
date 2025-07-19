@@ -21,7 +21,7 @@ using namespace std;
 int main() {
     int num1, num2;
     cin >> num1 >> num2;
-    cout << "Sum is: " << num1 + num2 << endl;
+    cout << "Sum: " << num1 + num2 << endl;
     return 0;
 }`,
     C: `#include <stdio.h>
@@ -29,7 +29,7 @@ int main() {
 int main() {
     int num1, num2;
     scanf("%d %d", &num1, &num2);
-    printf("Sum is: %d\n", num1 + num2);
+    printf("Sum: %d\n", num1 + num2);
     return 0;
 }`,
     Java: `import java.util.Scanner;
@@ -39,12 +39,12 @@ public class Main {
     Scanner sc = new Scanner(System.in);
     int num1 = sc.nextInt();
     int num2 = sc.nextInt();
-    System.out.println("Sum is: " + (num1 + num2));
+    System.out.println("Sum: " + (num1 + num2));
   }
 }`,
     Python: `num1 = int(input())
 num2 = int(input())
-print("Sum is:", num1 + num2)`,
+print("Sum:", num1 + num2)`,
   };
 
   const prismMap = {
