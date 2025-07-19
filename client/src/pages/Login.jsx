@@ -5,6 +5,9 @@ import { useNavigate, Link } from "react-router-dom";
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 const Login = () => {
   const [values, setValues] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
+const [error, setError] = useState("");
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -13,6 +16,8 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
   e.preventDefault();
+        setLoading(true);     
+    setError("");  
   const { email, password } = values;
 
   try {
@@ -36,6 +41,10 @@ localStorage.setItem("userId", response.data.user._id);
       const decoded = jwtDecode(token);
       const role = decoded.role || decoded.user?.role;
 
+if (decoded.exp * 1000 < Date.now()) {
+  alert("Session expired.");
+  return;
+}
 
       localStorage.setItem("role", role);
 
@@ -48,7 +57,9 @@ localStorage.setItem("userId", response.data.user._id);
     }
   } catch (error) {
     console.error("Login error:", error.response?.data?.message || error.message);
-    alert(error.response?.data?.message || "Login failed.");
+    setError(error.response?.data?.message || "Login failed.");
+  } finally {
+    setLoading(false);
   }
 };
 
@@ -90,12 +101,15 @@ localStorage.setItem("userId", response.data.user._id);
             />
           </div>
 
-          <button
+         <button
             type="submit"
             className="w-full py-2 text-white transition bg-blue-600 rounded hover:bg-blue-700"
+            disabled={loading}
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
+
+          {error && <p className="text-sm text-red-500">{error}</p>}
         </form>
 
         <p className="mt-4 text-sm text-center text-gray-500">
