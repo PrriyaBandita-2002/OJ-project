@@ -40,8 +40,8 @@ DBConnection();
 
 app.use("/api/auth", userRoutes);
 app.use("/api/problems", ProblemRoutes);
-app.get("/api/solutions", SolutionRoutes);
-app.get("/api/testcases", TestCaseRoutes);
+app.use("/api/solutions", SolutionRoutes);
+app.use("/api/testcases", TestCaseRoutes);
 app.use("/api/submit", submissionRoutes);
 app.use("/api/contests", contestRoutes);
 app.use("/api/ai-review", aiReviewRoute);
