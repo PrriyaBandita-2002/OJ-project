@@ -35,7 +35,7 @@ const ProblemDetail = () => {
   const [submissionSummary, setSubmissionSummary] = useState(null);
   const [aiReview, setAiReview] = useState('');
   const [reviewLoading, setReviewLoading] = useState(false);
-
+  const [submissionError, setSubmissionError] = useState('');
   // Load problem and starter code
 useEffect(() => {
   const fetchProblem = async () => {
@@ -130,10 +130,11 @@ const handleAiReview = async () => {
 
     setIsLoading(true);
     setOutput('');
+        setSubmissionError('');
     try {
       const token = localStorage.getItem("token");
         if (!token) {
-      console.error("[AUTH] No token found in localStorage.");
+      // console.error("[AUTH] No token found in localStorage.");
       alert("You must be logged in to submit code.");
       return;
     }
@@ -149,7 +150,7 @@ const handleAiReview = async () => {
         headers: { Authorization: `Bearer ${token}` , "Content-Type": "application/json",},
       });
 
-    console.log("[RESPONSE] Raw response:", res);
+    // console.log("[RESPONSE] Raw response:", res);
       const { verdict, testResults, problemTitle, timestamp } = res.data;
       // console.log(res.data);
       // console.log(`[SUBMIT SUCCESS] Verdict:`, verdict);
@@ -166,28 +167,36 @@ const handleAiReview = async () => {
       });
  localStorage.setItem("submissionSuccess", "true");
  const formattedOutput =
-  `Verdict: ${verdict}\n\n` +
+  ` Verdict: ${verdict.toUpperCase()}\n\n` +
   testResults.map((test, index) =>
-    `Testcase ${index + 1}:\n` +
-    `Input:\n${test.input}\n` +
-    `Expected Output:\n${test.expectedOutput}\n` +
-    `Your Output:\n${test.userOutput}\n` +
-    `Result: ${test.passed ? 'Passed ' : 'Failed'}\n`
-  ).join('\n');
+    const status = test.passed ? 'Passed' : 'Failed';
+      return (
+            `Testcase ${index + 1}:\n` +
+            `Input:\n${test.input}\nExpected Output:\n${test.expectedOutput}\nYour Output:\n${test.userOutput}\nResult: ${status}\n`
+          );
+        }).join('\n');
 
 
 
       setOutput(formattedOutput);
       setActiveTab("submission");
+  setTimeout(() => {
+        document.querySelector('#output-box')?.scrollTo(0, 0);
+      }, 100);
     }  catch (err) {
-    console.error("[ERROR] Submission failed:", err);
-    if (err.response) {
-      console.error("[ERROR] Server responded with:", err.response.data);
-      alert(`Submission Error: ${err.response.data?.error || "Unknown error"}`);
-    } else {
-      alert("Network or unexpected error occurred during submission.");
-    }
-  } finally {
+  console.error("[ERROR] Submission failed:", err);
+  let message = "An unexpected error occurred.";
+
+  if (err.response?.data?.error?.message) {
+    message = err.response.data.error.message;
+  } else if (err.response?.data?.message) {
+    message = err.response.data.message;
+  } else {
+    message = err.message || message;
+  }
+
+  setSubmissionError(message);
+}finally {
     setIsLoading(false);
   }
 };
@@ -348,6 +357,11 @@ highlight={code => highlight(code, Prism.languages[language] || Prism.languages.
         {/* Output */}
         <div>
           <label className="block mb-1 text-sm font-medium text-gray-700">Output</label>
+           {submissionError && (
+            <div className="p-3 mb-2 text-sm text-red-700 bg-red-100 border border-red-300 rounded">
+              <strong>Submission Error:</strong> {submissionError}
+            </div>
+          )}
           <div className="p-3 overflow-y-auto font-mono text-sm bg-gray-100 border border-gray-200 rounded-md h-28">
             {output || 'Output will appear here...'}
           </div>
