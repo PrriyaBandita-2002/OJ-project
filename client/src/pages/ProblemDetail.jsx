@@ -167,14 +167,18 @@ const handleAiReview = async () => {
       });
  localStorage.setItem("submissionSuccess", "true");
 const formattedOutput =
-  `Verdict: ${verdict}\n\n` +
-  testResults.map((test, index) =>
-    `Testcase ${index + 1}:\n` +
-    `Input:\n${test.input}\n` +
-    `Expected Output:\n${test.expectedOutput}\n` +
-    `Your Output:\n${test.userOutput}\n` +
-    `Result: ${test.passed ? 'Passed ' : 'Failed'}\n`
-  ).join('\n');
+  ` Verdict: ${verdict.toUpperCase()}\n\n` +
+  testResults.map((test, index) => {
+    const status = test.passed ? 'Passed' : ' Failed';
+    return (
+      `Testcase ${index + 1}:\n` +
+      `Input:\n${test.input}\n` +
+      `Expected Output:\n${test.expectedOutput}\n` +
+      `Your Output:\n${test.userOutput}\n` +
+      `Result: ${status}\n`
+    );
+  }).join('\n');
+
 
 
       setOutput(formattedOutput);
@@ -362,7 +366,7 @@ highlight={code => highlight(code, Prism.languages[language] || Prism.languages.
               <strong>Submission Error:</strong> {submissionError}
             </div>
           )}
-          <div className="p-3 overflow-y-auto font-mono text-sm bg-gray-100 border border-gray-200 rounded-md h-28">
+          <div id="output-box" className="p-3 overflow-y-auto font-mono text-sm bg-gray-100 border border-gray-200 rounded-md h-28 whitespace-pre-wrap">
             {output || 'Output will appear here...'}
           </div>
         </div>
