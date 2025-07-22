@@ -137,10 +137,13 @@ export const createTestCase = async (req, res) => {
   try {
     const { input, output, problem, hidden = false } = req.body;
 
-    if (!input || !output || !problem) {
+   if (!input || !output || !problem) {
       return res.status(400).json({
         success: false,
-        message: "Input, output, and problem ID are required.",
+        error: {
+          type: "ValidationError",
+          message: "Input, output, and problem ID are required.",
+        },
       });
     }
 
@@ -166,7 +169,8 @@ export const getTestCasesByProblem = async (req, res) => {
       });
     }
 
-    const testCases = await getTestCases(problemId, includeHidden === "true");
+    const isAdmin = req.user?.role === "admin";
+    const testCases = await getTestCases(problemId, isAdmin && includeHidden);
 
     if (!testCases.length) {
       return res
