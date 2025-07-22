@@ -36,7 +36,7 @@ const Signup = () => {
 
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
-        navigate("/login");
+    navigate("/dashboard");
       }
     } catch (error) {
       console.error("Signup error:", error.response?.data?.message || error.message);
