@@ -168,18 +168,17 @@ const handleAiReview = async () => {
  localStorage.setItem("submissionSuccess", "true");
  const formattedOutput =
   ` Verdict: ${verdict.toUpperCase()}\n\n` +
-  testResults.map((test, index) =>
-    const status = test.passed ? 'Passed' : 'Failed';
-      return (
+  testResults.map((test, index) => {
+          const status = test.passed ? 'Passed' : 'Failed';
+          return (
             `Testcase ${index + 1}:\n` +
             `Input:\n${test.input}\nExpected Output:\n${test.expectedOutput}\nYour Output:\n${test.userOutput}\nResult: ${status}\n`
           );
         }).join('\n');
 
-
-
       setOutput(formattedOutput);
       setActiveTab("submission");
+;
   setTimeout(() => {
         document.querySelector('#output-box')?.scrollTo(0, 0);
       }, 100);
