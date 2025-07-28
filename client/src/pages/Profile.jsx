@@ -41,9 +41,13 @@ export default function Profile() {
   // Handle profile update
   const handleUpdate = async () => {
     try {
+    
       const res = await axios.put(`${BASE_URL}/api/auth/profile`, formData, {
-        withCredentials: true,
-      });
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+  withCredentials: true,
+});
       setUser(res.data.updatedUser);
       setEditing(false);
       alert("Profile updated successfully!");
