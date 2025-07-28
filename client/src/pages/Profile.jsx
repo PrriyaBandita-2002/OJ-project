@@ -41,7 +41,7 @@ export default function Profile() {
   // Handle profile update
   const handleUpdate = async () => {
     try {
-    
+    const token = localStorage.getItem("token");
       const res = await axios.put(`${BASE_URL}/api/auth/profile`, formData, {
   headers: {
     Authorization: `Bearer ${token}`,
