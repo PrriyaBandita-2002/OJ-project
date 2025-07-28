@@ -48,6 +48,7 @@ export default function Profile() {
         Authorization: `Bearer ${token}`,
       },
     });
+      console.log(res.data);
       setUser(res.data.updatedUser);
       setEditing(false);
       alert("Profile updated successfully!");
