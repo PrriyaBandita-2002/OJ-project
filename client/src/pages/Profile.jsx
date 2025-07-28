@@ -43,12 +43,12 @@ export default function Profile() {
   const handleUpdate = async () => {
     try {
       const token = localStorage.getItem("token");
-    const res = await axios.put(`${BASE_URL}/api/auth/profile/edit`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-      console.log(res.data);
+   const res = await axios.put(`${BASE_URL}/api/auth/profile/edit`, formData, {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
+      
       setUser(res.data.updatedUser);
       setEditing(false);
       alert("Profile updated successfully!");
