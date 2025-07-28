@@ -16,12 +16,14 @@ export default function Profile() {
   useEffect(() => {
     const fetchProfile = async () => {
   try {
-    const token = localStorage.getItem("token");
-    const res = await axios.get(`${BASE_URL}/api/auth/profile`, {
+   const token = localStorage.getItem("token"); 
+    const res = await axios.put(`${BASE_URL}/api/auth/profile`, formData, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      withCredentials: true,
     });
+
     setUser(res.data.user);
     setFormData({
       username: res.data.user.username,
