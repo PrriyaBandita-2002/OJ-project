@@ -93,7 +93,7 @@ useEffect(() => {
           </div>
 
           <div className="p-4 bg-white shadow rounded-2xl">
-            <h3 className="mb-2 text-lg font-semibold">📈 Accuracy</h3>
+            <h3 className="mb-2 text-lg font-semibold">Accuracy</h3>
             <p className="text-3xl font-bold text-blue-600">{stats.accuracy}</p>
           </div>
 
