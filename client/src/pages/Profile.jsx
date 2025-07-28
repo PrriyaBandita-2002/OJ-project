@@ -43,7 +43,7 @@ export default function Profile() {
   const handleUpdate = async () => {
     try {
       const token = localStorage.getItem("token");
-    const res = await axios.put(`${BASE_URL}/api/auth/profile`, {
+    const res = await axios.put(`${BASE_URL}/api/auth/profile/edit`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
