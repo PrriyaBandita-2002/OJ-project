@@ -1,6 +1,4 @@
 
-
-```markdown
 # Online Judge Platform
 
 A full-stack Online Judge (OJ) platform built with the MERN stack. Supports competitive programming features like problem solving, code execution, live contests, time-travel debugging, and an AI-powered debugging assistant.
@@ -139,4 +137,5 @@ Developed with ❤️ by Prriya
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).
+
 
